@@ -1,6 +1,7 @@
 import sys
 import logging
 import gzip
+import re
 from bs4 import BeautifulSoup
 
 #  define logger as global variable
@@ -9,10 +10,22 @@ logger = logging.getLogger(__name__)
 # define KEYNAME for records
 KEYNAME = "WARC-TREC-ID"
 
+# install nltk prerequisites
+INSTALL_PREREQUISITES = False
+
 
 def prerequisites():
+    """
+    Install prerequisites for nltk modules
+    this function is executed only if INSTALL_PREREQUISITES=True
+    :return: None
+    """
     import nltk
     nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    nltk.download('averaged_perceptron_tagger')
+
 
 ########################################################
 #                      logger functions                #
@@ -61,9 +74,14 @@ def set_logger(stream_level="info", file_level="error", log_filename="file.log")
     # add the handlers to the logger
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
+
 ########################################################
 ########################################################
 
+
+########################################################
+#             nlp preprocessing helpers                #
+########################################################
 
 def find_labels(payload, labels):
     key = None
@@ -99,6 +117,20 @@ def split_records(stream):
         else:
             payload += line
 
+def split_headers(doc):
+    """
+    Returns only the headers and the body without the WARC and the connection variables/info
+    :param doc: string
+    :return: headers, body
+    """
+    if "Content-Type: text/html; charset=UTF-8" in doc:
+        headers, body = doc.split("Content-Type: text/html; charset=UTF-8")
+    else:
+        logger.warning("Missed document in split headers")
+        logger.debug("Document does not have Content-Type value")
+
+    return headers, body
+
 
 def remove_code_blocks(text):
     """
@@ -122,7 +154,7 @@ def remove_code_blocks(text):
 
 def tokenizer(text_string):
     """
-    This function uses nltk library and stanford tokenizer in order to split a string into tokens
+    This function uses nltk library in order to split a string into tokens
     :param text_string:
     :return: a list with tokens
     """
@@ -131,38 +163,93 @@ def tokenizer(text_string):
     return tokens
 
 
-def split_headers(doc):
+def stemming(word_tokens):
     """
-    Returns only the headers and the body without the WARC and the connection variables/info
-    :param doc: string
-    :return: headers, body
+    This function uses nltk library in order to stem the words
+    :param word_tokens:
+    :return:
     """
-    if "Content-Type: text/html; charset=UTF-8" in doc:
-        headers, body = doc.split("Content-Type: text/html; charset=UTF-8")
-    else:
-        logger.warning("Missed document in split headers")
-        logger.debug("Document does not have Content-Type value")
+    from nltk.stem import PorterStemmer
 
-    return headers, body
+    ps = PorterStemmer()
+    for word_token in word_tokens:
+        yield ps.stem(word_token)
 
 
+def lemmatization(word_tokens):
+    """
+    This function uses nltk library in order to lemma the words
+    :param word_tokens:
+    :return:
+    """
+    from nltk.stem import WordNetLemmatizer
 
-if __name__ == "__main__":
+    lemmatizer = WordNetLemmatizer()
+    for word_token in word_tokens:
+        yield lemmatizer.lemmatize(word_token)
 
-    # set logger
-    set_logger(stream_level="error", file_level="info", log_filename="file1.log")
 
-    #   nltk prerequisites
-    #prerequisites()
+def remove_stop_words(word_tokens):
+    """
+    This function is used in order to remove stopwords (e.g. "is", "a"), by using nltk library
+    :param word_tokens: tokens as they retrieved from tokenizer
+    :return: a list with tokens (without the stop words)
+    """
+    from nltk.corpus import stopwords
+    # define stop words
+    stop_words = set(stopwords.words('english'))
+    # filter text
+    filtered_sentence = [w for w in word_tokens if w not in stop_words]
 
-    # read input (filename)
-    logger.debug("Read input (filename)")
-    if len(sys.argv) > 1:
-        filename = sys.argv[1]
-    else:
-        logger.error("Please provide a filename as input")
-        raise IOError
+    return filtered_sentence
 
+
+def remove_alphanumeric(word_token):
+    """
+    This function is used in order to remove alphanumeric from tokens (by using library re - regular expressions)
+    :param word_token:
+    :return:
+    """
+    pattern = re.compile('[\W_]+')
+    return pattern.sub('', word_token)
+
+
+def remove_number_from_string(word_token):
+    """
+    This function is used in order to remove numbers from token
+    :param word_token:
+    :return:
+    """
+    return ''.join([i for i in word_token if not i.isdigit()])
+
+
+def pos_tagging(word_tokens):
+    """
+    This function uses nltk library in order to perform POS tagging
+    :param word_tokens:
+    :return: a tuple
+    """
+    from nltk import pos_tag
+    return pos_tag(word_tokens)
+
+
+def remove_hex_from_string(word_token):
+    """
+    Removes hex number from string. Looks for patterns with number followed by capital letter [A-F]
+    :param word_token:
+    :return: string
+    """
+    return re.sub(r'[0-9][A-F]', r'', word_token)
+
+########################################################
+########################################################
+
+
+def main():
+    """
+    Main function
+    :return:
+    """
     warcfile = gzip.open(sys.argv[1], "rt", errors="ignore")
     record_no = 0
     max_records = 4
@@ -172,13 +259,13 @@ if __name__ == "__main__":
             logger.debug("record_no < {}".format(max_records))
 
             logger.info("----------- Document No {}---------------".format(record_no))
-            if not record:      # if empty
+            if not record:  # if empty
                 logger.debug("EMPTY")
                 continue
             if record_no == 2 or record_no == 3:
                 continue
             soup = BeautifulSoup(record, "lxml")
-            logger.info(soup.text)
+            #logger.info(soup.text)
             logger.info("==================================")
             # split headers from body
             headers, body = split_headers(soup.text)
@@ -195,8 +282,30 @@ if __name__ == "__main__":
             body = " ".join(lines)
             # tokenize
             tokens = tokenizer(body)
-            for token in tokens:
-                logger.info(token)
+            tokens = [remove_hex_from_string(x) for x in tokens]
+            logger.info("======================+++++++++++++++++++++++++++++++")
+            tokens_without_numbers = []
+            for token in lemmatization(tokens):          # implement stemming
+                token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
+                token_without_numbers = remove_number_from_string(token_without_alpha)
+                if token_without_numbers is not "":         # remove empty strings
+                    tokens_without_numbers.append(token_without_numbers)
+            logger.info("--------------------------")
+            tokens_after_stop_word_removal = []
+            for word in remove_stop_words(tokens_without_numbers):          # remove stop words
+                if len(word) > 2:               # remove words with length < 3
+                    tokens_after_stop_word_removal.append(word)
+
+            del token_without_numbers
+
+            # POS tagging
+            tagged = pos_tagging(tokens_after_stop_word_removal)
+
+            for tagged_word in tagged:
+                logger.info(tagged_word)
+
+            del tokens_after_stop_word_removal
+
             logger.info("--------------------------")
             logger.info("--------------------------")
         else:
@@ -205,6 +314,25 @@ if __name__ == "__main__":
             exit(0)
 
 
+if __name__ == "__main__":
 
+    # set logger
+    set_logger(stream_level="error", file_level="info", log_filename="file1.log")
+
+    #   nltk prerequisites
+    if INSTALL_PREREQUISITES:
+        logger.debug("Install prerequisites for nltk...")
+        prerequisites()
+        logger.debug("Installation of nltk prerequisites completed")
+
+    # read input (filename)
+    logger.debug("Read input (filename)")
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        logger.error("Please provide a filename as input")
+        raise IOError
+
+    main()
 
 #               python3 main.py "../../../sample.warc.gz"
