@@ -189,17 +189,17 @@ def lemmatization(word_tokens):
         yield lemmatizer.lemmatize(word_token)
 
 
-def remove_stop_words(word_tokens):
+def remove_stop_words(tagged):
     """
     This function is used in order to remove stopwords (e.g. "is", "a"), by using nltk library
-    :param word_tokens: tokens as they retrieved from tokenizer
+    :param tagged: tokens as they retrieved from pos tagger (tuples)
     :return: a list with tokens (without the stop words)
     """
     from nltk.corpus import stopwords
     # define stop words
     stop_words = set(stopwords.words('english'))
     # filter text
-    filtered_sentence = [w for w in word_tokens if w not in stop_words]
+    filtered_sentence = [w for w in tagged if w[0] not in stop_words]           # w = (word_token, pos)
 
     return filtered_sentence
 
@@ -240,6 +240,21 @@ def remove_hex_from_string(word_token):
     :return: string
     """
     return re.sub(r'[0-9][A-F]', r'', word_token)
+
+
+def group_consecutive_groups(tagged):
+    """
+    group consecutive groups of words with the same NNP tag
+    :param tagged: result of POS (tuples)
+    :return: strings
+    """
+    from itertools import groupby
+    groups = groupby(tagged, key=lambda x: x[1])  # Group by tags
+    names = [[w for w, _ in words] for tag, words in groups if tag == "NNP"]
+    names = [" ".join(name) for name in names if len(name) >= 2]
+
+    return names
+
 
 ########################################################
 ########################################################
@@ -284,6 +299,7 @@ def main():
             tokens = tokenizer(body)
             tokens = [remove_hex_from_string(x) for x in tokens]
             logger.info("======================+++++++++++++++++++++++++++++++")
+
             tokens_without_numbers = []
             for token in lemmatization(tokens):          # implement stemming
                 token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
@@ -291,18 +307,28 @@ def main():
                 if token_without_numbers is not "":         # remove empty strings
                     tokens_without_numbers.append(token_without_numbers)
             logger.info("--------------------------")
+
+            # ------------------------------------
+            # POS tagging
+            tagged = pos_tagging(tokens_without_numbers)
+            groups = group_consecutive_groups(tagged)
+
+            # ------------------------------------
+
+            # stop word removal
             tokens_after_stop_word_removal = []
-            for word in remove_stop_words(tokens_without_numbers):          # remove stop words
-                if len(word) > 2:               # remove words with length < 3
-                    tokens_after_stop_word_removal.append(word)
+
+            for tagged_word in remove_stop_words(tagged):         # remove stop words (x[0] = word , x[1]= POS)
+                if len(tagged_word[0]) > 2:               # remove words with length < 3
+                    tokens_after_stop_word_removal.append(tagged_word)
 
             del token_without_numbers
 
-            # POS tagging
-            tagged = pos_tagging(tokens_after_stop_word_removal)
-
-            for tagged_word in tagged:
-                logger.info(tagged_word)
+            for word in tokens_after_stop_word_removal:
+                logger.info(word)
+            logger.info('====dddddddddddddddddddddddddddd===================================')
+            for tagged_word in groups:
+                logger.info(tagged_word)            # all are NNP
 
             del tokens_after_stop_word_removal
 
