@@ -361,4 +361,11 @@ if __name__ == "__main__":
 
     main()
 
-#               python3 main.py "../../../sample.warc.gz"
+
+    # experiments
+    # from nltk.tag import StanfordNERTagger
+    # st = StanfordNERTagger('exist-stanford-ner/resources/classifiers/english.all.3class.distsim.crf.ser.gz',
+    #                        'exist-stanford-ner/java/lib/stanford-ner-2015-04-20.jar', encoding='utf-8')
+    # classified_text = st.tag(tokenized_text)
+#               python3 preprocessing.py "../../../sample.warc.gz"
+
