@@ -10,9 +10,11 @@ if __name__ == '__main__':
         print('Usage: python elasticsearch.py DOMAIN QUERY')
         sys.exit(0)
 
-    my_entity = entity.Entity(ELS_QUERY)
-
+    total_entities = []
     for freebase_id, labels in els.search(ELS_DOMAIN, ELS_QUERY).items():
-        my_entity.set_freebase_values(freebase_id, labels)
+        my_entity = entity.Entity(ELS_QUERY)
+        my_entity.freebase_id = freebase_id
+        my_entity.freebase_label = labels
+        print(my_entity)
+        total_entities.append(my_entity)
 
-    print(my_entity)
