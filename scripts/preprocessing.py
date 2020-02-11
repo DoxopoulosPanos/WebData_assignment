@@ -265,7 +265,7 @@ def main():
     Main function
     :return:
     """
-    warcfile = gzip.open(sys.argv[1], "rt", errors="ignore")
+    warcfile = gzip.open(sys.argv[1], "rt")
     record_no = 0
     max_records = 4
     for record in split_records(warcfile):
@@ -292,12 +292,9 @@ def main():
             logger.info("ID: {}".format(warc_id))
             # # BODY preprocessing
             # remove code blocks
-            logger.info("breakpoint1")
             lines = remove_code_blocks(body)
-            logger.info("breakpoint2")
             # join all lines together
             body = " ".join(lines)
-            logger.info("breakpoint3s")
             # tokenize
             tokens = tokenizer(body)
             tokens = [remove_hex_from_string(x) for x in tokens]
