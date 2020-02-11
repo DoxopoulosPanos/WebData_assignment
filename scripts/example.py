@@ -71,7 +71,10 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
         print(my_entity)
-        total_entities.append(my_entity)
+
+        # append only if elastic search find matches
+        if freebase_id:
+            total_entities.append(my_entity)
     return total_entities
 
 
