@@ -15,9 +15,9 @@ echo "elasticsearch should be running now on node $ES_NODE:$ES_PORT (connected t
 
 sleep 10
 
-#python3 elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
+#python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
-#prun -v -np 1 python3 preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
+#prun -v -np 1 python preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
 prun -v -np 1 python example.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 

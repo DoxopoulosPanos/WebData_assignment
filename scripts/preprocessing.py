@@ -74,6 +74,7 @@ def set_logger(stream_level="info", file_level="error", log_filename="file.log")
     # add the handlers to the logger
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
+    logger.propagate = False
 
 ########################################################
 ########################################################
@@ -260,12 +261,13 @@ def group_consecutive_groups(tagged):
 ########################################################
 
 
-def main():
+def main(warc_filename):
     """
     Main function
+    :param warc_filename: the path to warc file
     :return:
     """
-    warcfile = gzip.open(sys.argv[1], "rt")
+    warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
     max_records = 4
     for record in split_records(warcfile):
@@ -324,13 +326,23 @@ def main():
 
             del token_without_numbers
 
+            all_NNP_words = []
             for word in tokens_after_stop_word_removal:
-                logger.info(word)
+                if word[1] == "NNP":
+                    logger.info(word[0])
+                    all_NNP_words.append(word[0])
             logger.info('====dddddddddddddddddddddddddddd===================================')
             for tagged_word in groups:
                 logger.info(tagged_word)            # all are NNP
+                all_NNP_words.append(tagged_word)
+
+            if __name__ == "__main__":
+                print all_NNP_words
+            else:
+                yield all_NNP_words
 
             del tokens_after_stop_word_removal
+            del all_NNP_words
 
             logger.info("--------------------------")
             logger.info("--------------------------")
@@ -359,7 +371,7 @@ if __name__ == "__main__":
         logger.error("Please provide a filename as input")
         raise IOError
 
-    main()
+    main(sys.argv[1])
 
 
     # experiments

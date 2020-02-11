@@ -1,20 +1,99 @@
+import logging
+
 import elasticsearch as els
+import preprocessing
 import entity
 
-if __name__ == '__main__':
-    import sys
+#  define logger as global variable
+logger = logging.getLogger(__name__)
 
-    try:
-        _, ELS_DOMAIN, ELS_QUERY = sys.argv
-    except Exception as e:
-        print('Usage: python elasticsearch.py DOMAIN QUERY')
-        sys.exit(0)
 
+########################################################
+#                      logger functions                #
+########################################################
+def map_logging_level(level):
+    """
+    This function maps the input level with the logging level
+    :param level: e.g. "debug", "info"
+    :return: logging level
+    """
+    log_map = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR
+    }
+
+    return log_map[level]
+
+
+def set_logger(stream_level="info", file_level="error", log_filename="file.log"):
+    """
+    This function is used in order to set the level of the global logger
+    :param stream_level: logging level for printing(e.g. logging.DEBUG)
+    :param file_level: logging level for writing in log file (e.g. logging.DEBUG)
+    :param log_filename: the path to the file that logs will be stored
+    :return:
+    """
+    global logger
+
+    # find level
+    stream_log_level = map_logging_level(stream_level)
+    file_log_level = map_logging_level(file_level)
+    # create console handler with a higher log level
+    stream_handler = logging.StreamHandler()
+    file_handler = logging.FileHandler(log_filename)
+    # set logger level
+    logger.setLevel(logging.DEBUG)
+    # set handler level
+    stream_handler.setLevel(stream_log_level)
+    file_handler.setLevel(file_log_level)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    stream_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.propagate = False
+
+
+def find_candidates(ES_DOMAIN, ES_QUERY):
+    """
+    This function calls elastic search script in order to find all possible candidates for the given ELS_QUERY
+    :param ES_DOMAIN: ELS_NODE:ELS_PORT
+    :param ES_QUERY:  string (e.g. "Vrije University")
+    :return:
+    """
     total_entities = []
-    for freebase_id, labels in els.search(ELS_DOMAIN, ELS_QUERY).items():
+    for freebase_id, labels in els.search(ES_DOMAIN, ES_QUERY).items():
         my_entity = entity.Entity(ELS_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
         print(my_entity)
         total_entities.append(my_entity)
+    return total_entities
+
+
+if __name__ == '__main__':
+    import sys
+
+    # set loggers
+    set_logger(stream_level="error", file_level="info", log_filename="file1.log")
+    preprocessing.set_logger(stream_level="error", file_level="error", log_filename="file2.log")
+
+    try:
+        _, ELS_DOMAIN, WARC_FILE = sys.argv
+    except Exception as e:
+        print('Usage: python elasticsearch.py DOMAIN QUERY')
+        sys.exit(0)
+
+    for document_results in preprocessing.main(WARC_FILE):
+        logger.info("============  DOCUMENT  ==============")
+        for ELS_QUERY in document_results:
+            logger.info("=================================")
+            logger.info("Candidates for [{}]".format(ELS_QUERY))
+            logger.info(find_candidates(ELS_DOMAIN, ELS_QUERY))
+            logger.info("=================================")
+
 
