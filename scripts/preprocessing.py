@@ -292,9 +292,12 @@ def main():
             logger.info("ID: {}".format(warc_id))
             # # BODY preprocessing
             # remove code blocks
+            logger.info("breakpoint1")
             lines = remove_code_blocks(body)
+            logger.info("breakpoint2")
             # join all lines together
             body = " ".join(lines)
+            logger.info("breakpoint3s")
             # tokenize
             tokens = tokenizer(body)
             tokens = [remove_hex_from_string(x) for x in tokens]
@@ -368,4 +371,5 @@ if __name__ == "__main__":
     #                        'exist-stanford-ner/java/lib/stanford-ner-2015-04-20.jar', encoding='utf-8')
     # classified_text = st.tag(tokenized_text)
 #               python3 preprocessing.py "../../../sample.warc.gz"
+#               python3 preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
 
