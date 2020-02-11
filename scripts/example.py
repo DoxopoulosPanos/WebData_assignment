@@ -75,6 +75,16 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
     return total_entities
 
 
+def log_candidates(candidates):
+    """
+
+    :param candidates: a list with candidates
+    :return:
+    """
+    for candidate in candidates:
+        logger.info("ID: {},   LABELS: {} ".format(candidate.freebase_id, candidate.freebase_label))
+
+
 if __name__ == '__main__':
     import sys
 
@@ -93,7 +103,8 @@ if __name__ == '__main__':
         for ELS_QUERY in document_results:
             logger.info("=================================")
             logger.info("Candidates for [{}]".format(ELS_QUERY))
-            logger.info(find_candidates(ELS_DOMAIN, ELS_QUERY))
+            candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
+            log_candidates(candidates)
             logger.info("=================================")
 
 
