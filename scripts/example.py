@@ -121,7 +121,7 @@ def main():
             log_candidates(candidates)
             logger.info("=================================")
 
-    print "QUERY Trident for candidate: {}".format(candidates[0].name)
+    logger.info("QUERY Trident for candidate: {}".format(candidates[0].name))
     trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
     logger.info(json.dumps(trident_response, indent=2))
 
