@@ -118,6 +118,7 @@ def split_records(stream):
         else:
             payload += line
 
+
 def split_headers(doc):
     """
     Returns only the headers and the body without the WARC and the connection variables/info

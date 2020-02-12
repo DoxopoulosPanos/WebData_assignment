@@ -1,6 +1,8 @@
+import sys
 import logging
 
 import elasticsearch as els
+import sparql
 import preprocessing
 import entity
 
@@ -58,6 +60,7 @@ def set_logger(stream_level="info", file_level="error", log_filename="file.log")
     logger.propagate = False
 
 
+# # elastic search
 def find_candidates(ES_DOMAIN, ES_QUERY):
     """
     This function calls elastic search script in order to find all possible candidates for the given ELS_QUERY
@@ -67,14 +70,12 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
     """
     total_entities = []
     for freebase_id, labels in els.search(ES_DOMAIN, ES_QUERY).items():
-        my_entity = entity.Entity(ELS_QUERY)
+        my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
         print(my_entity)
 
-        # append only if elastic search find matches
-        if freebase_id:
-            total_entities.append(my_entity)
+        total_entities.append(my_entity)
     return total_entities
 
 
@@ -88,15 +89,24 @@ def log_candidates(candidates):
         logger.info("ID: {},   LABELS: {} ".format(candidate.freebase_id, candidate.freebase_label))
 
 
-if __name__ == '__main__':
-    import sys
+# # Sparql
+def get_kb_info_by_candidate(sql_domain, candidate_id):
+    """
+    Gets the data from trident Knowledge Base about a specific candidate
+    :param sql_domain: SQL_NODE:SQL_PORT
+    :param candidate_id: the freebase_id
+    :return:
+    """
+    sparql.search(sql_domain, candidate_id)
 
+
+def main():
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
     preprocessing.set_logger(stream_level="error", file_level="error", log_filename="file2.log")
 
     try:
-        _, ELS_DOMAIN, WARC_FILE = sys.argv
+        _, ELS_DOMAIN, SQL_DOMAIN, WARC_FILE = sys.argv
     except Exception as e:
         print('Usage: python elasticsearch.py DOMAIN QUERY')
         sys.exit(0)
@@ -109,5 +119,14 @@ if __name__ == '__main__':
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates)
             logger.info("=================================")
+
+    print "QUERY Trident for candidate: {}".format(candidates[0].name)
+    get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+
+
+if __name__ == '__main__':
+    main()
+
+
 
 
