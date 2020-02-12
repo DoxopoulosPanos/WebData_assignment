@@ -133,9 +133,9 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
     candidate_id = "m.{}".format(candidate_id)
     # build query
     query = "select distinct ?abstract where {} " \
-            "?s < http: // www.w3.org / 2002 / 07 / owl  # sameAs> <http://rdf.freebase.com/ns/{}> . " \
-            "?s < http: // www.w3.org / 2002 / 07 / owl  # sameAs> ?o ." \
-            "?o < http: // dbpedia.org / ontology / abstract > ?abstract." \
+            "?s <http://www.w3.org/2002/07/owl#sameAs> <http://rdf.freebase.com/ns/{}> . " \
+            "?s <http://www.w3.org/2002/07/owl#sameAs> ?o ." \
+            "?o <http://dbpedia.org/ontology/abstract> ?abstract." \
             "{}".format("{", candidate_id, "}")
     print query
     return query
