@@ -119,10 +119,11 @@ def main():
             logger.info("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates)
-            logger.info("=================================")
-            logger.info("QUERY Trident for candidate: {}".format(candidates[0].name))
-            trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
-            logger.info(json.dumps(trident_response, indent=2))
+            logger.info("================End of ES -- Start of Trident=================")
+            if candidates[0] is not None:
+                logger.info("QUERY Trident for candidate: {} with id: {}".format(candidates[0].name, candidates[0].freebase_id))
+                trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+                logger.info(json.dumps(trident_response, indent=2))
             logger.info("===============  END of Trident ==================")
 
 
