@@ -98,7 +98,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     :param candidate_id: the freebase_id
     :return:
     """
-    return sparql.search(sql_domain, candidate_id)
+    return sparql.sparql(sql_domain, candidate_id)
 
 
 def main():
