@@ -111,10 +111,9 @@ def build_kb_query(candidate_id, limit=10):
     :param limit: the maximum number of result that the query will find
     :return:
     """
-    #remove fist and last character : "/"
-    candidate_id = candidate_id[1:-1]
-    # replace second "/" with "."
-    candidate_id = candidate_id.replace("/", ".")
+    #remove first 3 characters with : m.
+    candidate_id = candidate_id[3:]
+    candidate_id = "m.{}".format(candidate_id)
     # build query
     query = 'select * where {}<http://rdf.freebase.com/ns/{}_> ?p ?o{} limit 10'.format("{", candidate_id, "}")
     return query
