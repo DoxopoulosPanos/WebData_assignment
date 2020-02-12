@@ -99,7 +99,8 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     :return:
     """
     # build query
-    query = build_kb_query(candidate_id, limit=10)
+    #query = build_kb_query(candidate_id, limit=10)
+    query = build_kb_query_for_abstracts(candidate_id, limit=10)
     print "query = {}".format(query)
     return sparql.sparql(sql_domain, query)
 
@@ -115,8 +116,31 @@ def build_kb_query(candidate_id, limit=10):
     candidate_id = candidate_id[3:]
     candidate_id = "m.{}".format(candidate_id)
     # build query
-    query = 'select * where {}<http://rdf.freebase.com/ns/{}_> ?p ?o{} limit 10'.format("{", candidate_id, "}")
+    query = 'select * where {}<http://rdf.freebase.com/ns/{}> ?p ?o{} limit 10'.format("{", candidate_id, "}")
+    print query
     return query
+
+
+def build_kb_query_for_abstracts(candidate_id, limit=10):
+    """
+    Build basic query for trident
+    :param candidate_id: the freebase_id of a candidate as returned from elastic search
+    :param limit: the maximum number of result that the query will find
+    :return:
+    """
+    #remove first 3 characters with : m.
+    candidate_id = candidate_id[3:]
+    candidate_id = "m.{}".format(candidate_id)
+    # build query
+    query = "select distinct ?abstract where {} " \
+            "?s < http: // www.w3.org / 2002 / 07 / owl  # sameAs> <http://rdf.freebase.com/ns/{}> . " \
+            "?s < http: // www.w3.org / 2002 / 07 / owl  # sameAs> ?o ." \
+            "?o < http: // dbpedia.org / ontology / abstract > ?abstract." \
+            "{}".format("{", candidate_id, "}")
+    print query
+    return query
+
+
 
 
 def main():
