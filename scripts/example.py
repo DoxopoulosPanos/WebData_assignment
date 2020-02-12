@@ -144,13 +144,15 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
 def get_only_english_abstract_from_json(trident_response):
     """
     Reads a json as returned from trident and returns the abstract in English
-    :param trident_response: json
+    :param trident_response: json of one candidate
     :return: string
     """
-    json_response = json.loads(trident_response)
+    #json_response = json.loads(trident_response)
     print("==============================================================================================================")
-    print "results: {}".format(json_response["results"])
-    print "results: {}".format(json_response["results"][0])
+    candidate_abstracts = trident_response["results"]["bindings"]
+    for abstract in candidate_abstracts:
+        if abstract["value"].endswith('"@en"'):
+            print "results: {}".format(abstract["value"])
     print(
         "==============================================================================================================")
 
