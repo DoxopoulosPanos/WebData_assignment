@@ -18,10 +18,12 @@ def sparql(domain, query):
     if response:
         try:
             response = response.json()
-            print(json.dumps(response, indent=2))
+            #print(json.dumps(response, indent=2))
         except Exception as e:
             print(response)
             raise e
+
+    return response
 
 
 if __name__ == '__main__':

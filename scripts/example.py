@@ -1,5 +1,6 @@
 import sys
 import logging
+import json
 
 import elasticsearch as els
 import sparql
@@ -97,7 +98,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     :param candidate_id: the freebase_id
     :return:
     """
-    sparql.search(sql_domain, candidate_id)
+    return sparql.search(sql_domain, candidate_id)
 
 
 def main():
@@ -121,7 +122,8 @@ def main():
             logger.info("=================================")
 
     print "QUERY Trident for candidate: {}".format(candidates[0].name)
-    get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+    trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+    logger.info(json.dumps(trident_response, indent=2))
 
 
 if __name__ == '__main__':
