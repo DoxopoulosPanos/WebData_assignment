@@ -141,6 +141,18 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
     return query
 
 
+def get_only_english_abstract_from_json(trident_response):
+    """
+    Reads a json as returned from trident and returns the abstract in English
+    :param trident_response: json
+    :return: string
+    """
+    json_response = json.loads(trident_response)
+    print("==============================================================================================================")
+    print "results: {}".format(json_response["results"])
+    print "results: {}".format(json_response["results"][0])
+    print(
+        "==============================================================================================================")
 
 
 def main():
@@ -162,10 +174,11 @@ def main():
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates)
             logger.info("================End of ES -- Start of Trident=================")
-            if candidates[0] is not None:
+            if len(candidates) > 0:
                 logger.info("QUERY Trident for candidate: {} with id: {}".format(candidates[0].name, candidates[0].freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
                 logger.info(json.dumps(trident_response, indent=2))
+                get_only_english_abstract_from_json(trident_response)
             logger.info("===============  END of Trident ==================")
 
 
