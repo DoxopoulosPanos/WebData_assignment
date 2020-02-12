@@ -100,6 +100,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     """
     # build query
     query = build_kb_query(candidate_id, limit=10)
+    print "query = {}".format(query)
     return sparql.sparql(sql_domain, query)
 
 
