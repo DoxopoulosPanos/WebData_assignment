@@ -111,8 +111,8 @@ def build_kb_query(candidate_id, limit=10):
     :param limit: the maximum number of result that the query will find
     :return:
     """
-    #remove fist character : "/"
-    candidate_id = candidate_id[1:]
+    #remove fist and last character : "/"
+    candidate_id = candidate_id[1:-1]
     # replace second "/" with "."
     candidate_id = candidate_id.replace("/", ".")
     # build query
