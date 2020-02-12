@@ -112,7 +112,7 @@ def build_kb_query(candidate_id, limit=10):
     :return:
     """
     #remove fist character : "/"
-    candidate_id = candidate_id[-1]
+    candidate_id = candidate_id[1:]
     # replace second "/" with "."
     candidate_id = candidate_id.replace("/", ".")
     # build query
