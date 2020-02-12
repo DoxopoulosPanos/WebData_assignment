@@ -95,10 +95,22 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     """
     Gets the data from trident Knowledge Base about a specific candidate
     :param sql_domain: SQL_NODE:SQL_PORT
-    :param candidate_id: the freebase_id
+    :param candidate_id: the freebase_id of a candidate as returned from elastic search
     :return:
     """
-    return sparql.sparql(sql_domain, candidate_id)
+    # build query
+    query = build_kb_query(candidate_id, limit=10)
+    return sparql.sparql(sql_domain, query)
+
+
+def build_kb_query(candidate_id, limit=10):
+    """
+    Build basic query for trident
+    :param candidate_id: the freebase_id of a candidate as returned from elastic search
+    :param limit: the maximum number of result that the query will find
+    :return:
+    """
+    return "select * where {<http://rdf.freebase.com/ns/{}_> ?p ?o} limit 10".format(candidate_id)
 
 
 def main():
