@@ -43,3 +43,5 @@ prun -v -np 1 python example.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratc
 
 # kill elastic search server
 kill $ES_PID
+# kill trident
+kill $KB_PID

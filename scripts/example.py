@@ -115,15 +115,15 @@ def main():
     for document_results in preprocessing.main(WARC_FILE):
         logger.info("============  DOCUMENT  ==============")
         for ELS_QUERY in document_results:
-            logger.info("=================================")
+            logger.info("===============  Elastic search ==================")
             logger.info("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates)
             logger.info("=================================")
-
-    logger.info("QUERY Trident for candidate: {}".format(candidates[0].name))
-    trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
-    logger.info(json.dumps(trident_response, indent=2))
+            logger.info("QUERY Trident for candidate: {}".format(candidates[0].name))
+            trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+            logger.info(json.dumps(trident_response, indent=2))
+            logger.info("===============  END of Trident ==================")
 
 
 if __name__ == '__main__':
