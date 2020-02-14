@@ -74,7 +74,6 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
         my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
-        print(my_entity)
 
         total_entities.append(my_entity)
     return total_entities
@@ -101,7 +100,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     # build query
     #query = build_kb_query(candidate_id, limit=10)
     query = build_kb_query_for_abstracts(candidate_id, limit=10)
-    print "query = {}".format(query)
+    #print "query = {}".format(query)
     return sparql.sparql(sql_domain, query)
 
 
@@ -157,6 +156,10 @@ def get_only_english_abstract_from_json(trident_response):
 
 
 def main():
+    """
+    Main function
+    :return:
+    """
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
     preprocessing.set_logger(stream_level="error", file_level="error", log_filename="file2.log")
@@ -167,6 +170,8 @@ def main():
         print('Usage: python elasticsearch.py DOMAIN QUERY')
         sys.exit(0)
 
+    # for each word in each document find the potential candidates by using elastic search.
+    # For each candidate query trident KB and keep only the english abstracts from the results
     for document_results in preprocessing.main(WARC_FILE):
         logger.info("============  DOCUMENT  ==============")
         for ELS_QUERY in document_results:
@@ -178,9 +183,9 @@ def main():
             for candidate in candidates:
                 logger.info("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
-                logger.info(json.dumps(trident_response, indent=2))
+                #logger.info(json.dumps(trident_response, indent=2))
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
-                logger.info("Abstract from trident: {}".format(candidate.kb_abstract))
+                logger.info("Abstract from trident: {}\n".format(candidate.kb_abstract))
             logger.info("===============  END of Trident ==================")
 
 
