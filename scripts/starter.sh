@@ -37,8 +37,8 @@ echo "Trident should be running now on node $KB_NODE:$KB_PORT (connected to proc
 #python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 #prun -v -np 1 python preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
-prun -v -np 1 python example.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
-#prun -v -np 1 python example.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
+prun -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
+#prun -v -np 1 python linker.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 
 # kill elastic search server

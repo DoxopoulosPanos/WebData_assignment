@@ -61,7 +61,9 @@ def set_logger(stream_level="info", file_level="error", log_filename="file.log")
     logger.propagate = False
 
 
-# # elastic search
+########################################################
+#              elastic search functions                #
+########################################################
 def find_candidates(ES_DOMAIN, ES_QUERY):
     """
     This function calls elastic search script in order to find all possible candidates for the given ELS_QUERY
@@ -79,17 +81,25 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
     return total_entities
 
 
-def log_candidates(candidates):
+def log_candidates(candidates, verbose_level="info"):
     """
-
+    Displays the freebase id and the labels found for each candidate
     :param candidates: a list with candidates
+    :param verbose_level: the level of the output that will be produced
     :return:
     """
-    for candidate in candidates:
-        logger.info("ID: {},   LABELS: {} ".format(candidate.freebase_id, candidate.freebase_label))
+    if verbose_level == "info":
+        for candidate in candidates:
+            logger.info("ID: {},   LABELS: {} ".format(candidate.freebase_id, candidate.freebase_label))
+    elif verbose_level == "debug":
+        for candidate in candidates:
+            logger.debug("ID: {},   LABELS: {} ".format(candidate.freebase_id, candidate.freebase_label))
 
 
-# # Sparql
+########################################################
+#              Sparql (trident) functions              #
+########################################################
+
 def get_kb_info_by_candidate(sql_domain, candidate_id):
     """
     Gets the data from trident Knowledge Base about a specific candidate
@@ -155,6 +165,22 @@ def get_only_english_abstract_from_json(trident_response):
     return english_abstacts
 
 
+def remove_candidates_without_abstracts(candidates):
+    """
+    This function is used in order to remove an object of class entity that we did not find any english abstract
+    at trident.
+    :param candidates: a list of objects
+    :return: a list of objects
+    """
+    new_candidates = []
+    for candidate in candidates:
+        if candidate.kb_abstract not in [None, ""]:
+            # if candidate has abstract append him in the new list
+            new_candidates.append(candidate)
+
+    return new_candidates
+
+
 def main():
     """
     Main function
@@ -176,17 +202,21 @@ def main():
         logger.info("============  DOCUMENT  ==============")
         for ELS_QUERY in document_results:
             logger.info("===============  Elastic search ==================")
-            logger.info("Candidates for [{}]".format(ELS_QUERY))
+            logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
-            log_candidates(candidates)
-            logger.info("================End of ES -- Start of Trident=================")
+            log_candidates(candidates, "debug")
+            logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
-                logger.info("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
+                logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 #logger.info(json.dumps(trident_response, indent=2))
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
-                logger.info("Abstract from trident: {}\n".format(candidate.kb_abstract))
+                logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
             logger.info("===============  END of Trident ==================")
+            candidates = remove_candidates_without_abstracts(candidates)
+            logger.info("===============  Candidates ==================")
+            for candidate in candidates:
+                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n\n".format(candidate.freebase_id, candidate.freebase_label, candidate.kb_abstract))
 
 
 if __name__ == '__main__':
