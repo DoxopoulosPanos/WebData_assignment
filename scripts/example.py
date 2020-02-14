@@ -145,16 +145,15 @@ def get_only_english_abstract_from_json(trident_response):
     """
     Reads a json as returned from trident and returns the abstract in English
     :param trident_response: json of one candidate
-    :return: string
+    :return: list with the english abstracts of a specific candidate
     """
-    #json_response = json.loads(trident_response)
-    print("==============================================================================================================")
+    english_abstacts =[]
     candidate_abstracts = trident_response["results"]["bindings"]
     for abstract in candidate_abstracts:
-        if abstract["value"].endswith('"@en"'):
-            print "results: {}".format(abstract["value"])
-    print(
-        "==============================================================================================================")
+        if abstract["abstract"]["value"].endswith('"@en"'):
+            english_abstacts.append(abstract["abstract"]["value"])
+
+    return english_abstacts
 
 
 def main():
@@ -176,11 +175,12 @@ def main():
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates)
             logger.info("================End of ES -- Start of Trident=================")
-            if len(candidates) > 0:
-                logger.info("QUERY Trident for candidate: {} with id: {}".format(candidates[0].name, candidates[0].freebase_id))
-                trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidates[0].freebase_id)
+            for candidate in candidates:
+                logger.info("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
+                trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 logger.info(json.dumps(trident_response, indent=2))
-                get_only_english_abstract_from_json(trident_response)
+                candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
+                logger.info("Abstract from trident: {}".format(candidate.kb_abstract))
             logger.info("===============  END of Trident ==================")
 
 

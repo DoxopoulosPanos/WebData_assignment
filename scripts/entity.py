@@ -9,6 +9,7 @@ class Entity:
         self.name = name
         self.freebase_id = None
         self.freebase_label = None
+        self.kb_abstract = None
 
     def __str__(self):
         return "Entity____  NAME: {} , ID: {} , LABEL: {}".format(self.name, self.freebase_id, self.freebase_label)
