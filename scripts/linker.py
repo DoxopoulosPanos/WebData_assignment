@@ -145,6 +145,7 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
             "?s <http://www.w3.org/2002/07/owl#sameAs> ?o ." \
             "?o <http://dbpedia.org/ontology/abstract> ?abstract." \
             "{}".format("{", candidate_id, "}")
+    print "build QUERY: {}".format(query)
     return query
 
 
@@ -239,6 +240,8 @@ def main():
             logger.debug("===============  END of Trident ==================")
             candidates = remove_candidates_without_abstracts(candidates)
             logger.info("===============  Candidates ==================")
+            # initialise the best candidate
+            candidate_with_best_score = candidates[0]
             for candidate in candidates:
                 # concatenate the english abstract of one candidate
                 abstract = " ".join(candidate.kb_abstract)
@@ -251,6 +254,19 @@ def main():
                     candidate.kb_abstract,
                     candidate.kb_nouns,
                     candidate.similarity_score))
+                # check the best score from candidates
+                if candidate.similarity_score > candidate_with_best_score.similarity_score:
+                    # change best candidate
+                    candidate_with_best_score = candidate
+
+            logger.info(" -------------   Candidate with BEST score for {} -------------  ".format(ELS_QUERY))
+            logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
+                candidate.freebase_id,
+                candidate.freebase_label,
+                candidate.kb_abstract,
+                candidate.kb_nouns,
+                candidate.similarity_score))
+
 
 
 if __name__ == '__main__':
