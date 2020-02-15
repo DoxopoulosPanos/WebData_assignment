@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 KEYNAME = "WARC-TREC-ID"
 
 # install nltk prerequisites
-INSTALL_PREREQUISITES = False
+INSTALL_PREREQUISITES = True
 
 
 def prerequisites():
@@ -260,6 +260,51 @@ def group_consecutive_groups(tagged):
 
 ########################################################
 ########################################################
+def extract_nouns_from_text(text):
+    """
+    This functions uses all the aforementioned functions in order to extract the nouns (NNP) from the given text
+    :param text:
+    :return: a list
+    """
+    logger.debug("extracting nouns from text ...")
+    # tokenize
+    tokens = tokenizer(text)
+    tokens = [remove_hex_from_string(x) for x in tokens]
+
+    tokens_without_numbers = []
+    for token in lemmatization(tokens):  # implement stemming
+        token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
+        token_without_numbers = remove_number_from_string(token_without_alpha)
+        if token_without_numbers is not "":  # remove empty strings
+            tokens_without_numbers.append(token_without_numbers)
+
+    # ------------------------------------
+    # POS tagging
+    tagged = pos_tagging(tokens_without_numbers)
+    groups = group_consecutive_groups(tagged)
+
+    # ------------------------------------
+
+    # stop word removal
+    tokens_after_stop_word_removal = []
+
+    for tagged_word in remove_stop_words(tagged):  # remove stop words (x[0] = word , x[1]= POS)
+        if len(tagged_word[0]) > 2:  # remove words with length < 3
+            tokens_after_stop_word_removal.append(tagged_word)
+
+    del token_without_numbers
+
+    all_NNP_words = []
+    for word in tokens_after_stop_word_removal:
+        if word[1] == "NNP":
+            logger.info(word[0])
+            all_NNP_words.append(word[0])
+
+    for tagged_word in groups:
+        logger.info(tagged_word)  # all are NNP
+        all_NNP_words.append(tagged_word)
+
+    return all_NNP_words
 
 
 def main(warc_filename):
@@ -299,7 +344,7 @@ def main(warc_filename):
             # join all lines together
             body = " ".join(lines)
             # tokenize
-            tokens = tokenizer(body)
+            tokens = tokenizer(body) # TODO: all the following block of code should be replaced
             tokens = [remove_hex_from_string(x) for x in tokens]
             logger.info("======================+++++++++++++++++++++++++++++++")
 

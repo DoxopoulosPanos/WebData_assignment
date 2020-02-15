@@ -210,13 +210,20 @@ def main():
                 logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 #logger.info(json.dumps(trident_response, indent=2))
+                # extract only English abstract
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
                 logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
             logger.info("===============  END of Trident ==================")
             candidates = remove_candidates_without_abstracts(candidates)
             logger.info("===============  Candidates ==================")
             for candidate in candidates:
-                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n\n".format(candidate.freebase_id, candidate.freebase_label, candidate.kb_abstract))
+                # extract the nouns from the abstract
+                candidate.kb_nouns = preprocessing.extract_nouns_from_text(candidate.kb_abstract)
+                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: \n\n\n".format(
+                    candidate.freebase_id,
+                    candidate.freebase_label,
+                    candidate.kb_abstract,
+                    candidate.kb_nouns))
 
 
 if __name__ == '__main__':
