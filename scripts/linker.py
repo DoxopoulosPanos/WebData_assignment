@@ -126,7 +126,6 @@ def build_kb_query(candidate_id, limit=10):
     candidate_id = "m.{}".format(candidate_id)
     # build query
     query = 'select * where {}<http://rdf.freebase.com/ns/{}> ?p ?o{} limit 10'.format("{", candidate_id, "}")
-    print query
     return query
 
 
