@@ -145,7 +145,6 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
             "?s <http://www.w3.org/2002/07/owl#sameAs> ?o ." \
             "?o <http://dbpedia.org/ontology/abstract> ?abstract." \
             "{}".format("{", candidate_id, "}")
-    print query
     return query
 
 
@@ -180,6 +179,30 @@ def remove_candidates_without_abstracts(candidates):
     return new_candidates
 
 
+def similarity_measure(list1, list2, threeshold=0.8):
+    """
+    This function calculates a score based on the hamming distance between the words in the two lists.
+    If the similarity between two words is above the threeshold then it is calculated as similar
+    :param list1: list of stings
+    :param list2: list of strings
+    :param threeshold:
+    :return: a score (float)
+    """
+    import textdistance
+
+    score = 0
+
+    for word1 in list1:
+        for word2 in list2:
+            if textdistance.hamming.normalized_similarity(word1, word2) > threeshold:
+                # word is similar (above the threeshold)
+                score += 1
+    # calculate the normalized score
+    score_normalized = score/len(list1)
+
+    return score_normalized
+
+
 def main():
     """
     Main function
@@ -200,19 +223,19 @@ def main():
     for document_results in preprocessing.main(WARC_FILE):
         logger.info("============  DOCUMENT  ==============")
         for ELS_QUERY in document_results:
-            logger.info("===============  Elastic search ==================")
+            logger.debug("===============  Elastic search ==================")
             logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates, "debug")
-            logger.info("================End of ES -- Start of Trident=================")
+            logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
                 logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 #logger.info(json.dumps(trident_response, indent=2))
                 # extract only English abstract
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
-                logger.info("Abstract from trident: {}\n".format(candidate.kb_abstract))
-            logger.info("===============  END of Trident ==================")
+                logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
+            logger.debug("===============  END of Trident ==================")
             candidates = remove_candidates_without_abstracts(candidates)
             logger.info("===============  Candidates ==================")
             for candidate in candidates:
@@ -220,11 +243,13 @@ def main():
                 abstract = " ".join(candidate.kb_abstract)
                 # extract the nouns from the abstract
                 candidate.kb_nouns = preprocessing.extract_nouns_from_text(abstract)
-                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n\n".format(
+                candidate.similarity_score = similarity_measure(document_results, candidate.kb_nouns)
+                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
                     candidate.freebase_id,
                     candidate.freebase_label,
                     candidate.kb_abstract,
-                    candidate.kb_nouns))
+                    candidate.kb_nouns,
+                    candidate.similarity_score))
 
 
 if __name__ == '__main__':
