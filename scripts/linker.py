@@ -198,7 +198,7 @@ def similarity_measure(list1, list2, threeshold=0.8):
                 # word is similar (above the threeshold)
                 score += 1
     # calculate the normalized score
-    score_normalized = score/len(list1)
+    score_normalized = float(score)/len(list1)
 
     return score_normalized
 
@@ -223,6 +223,7 @@ def main():
     for document_results in preprocessing.main(WARC_FILE):
         logger.info("============  DOCUMENT  ==============")
         for ELS_QUERY in document_results:
+            print "looking for candidates for word {}".format(ELS_QUERY)
             logger.debug("===============  Elastic search ==================")
             logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
