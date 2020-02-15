@@ -205,19 +205,22 @@ def main():
             logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
             log_candidates(candidates, "debug")
-            logger.debug("================End of ES -- Start of Trident=================")
+            logger.info("================End of ES -- Start of Trident=================")
             for candidate in candidates:
                 logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
                 trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 #logger.info(json.dumps(trident_response, indent=2))
                 # extract only English abstract
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
-                logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
+                logger.info("Abstract from trident: {}\n".format(candidate.kb_abstract))
             logger.info("===============  END of Trident ==================")
             candidates = remove_candidates_without_abstracts(candidates)
             logger.info("===============  Candidates ==================")
             for candidate in candidates:
                 # extract the nouns from the abstract
+                print "================================================================"
+                print type(candidate.kb_abstract)
+                print "================================================================"
                 candidate.kb_nouns = preprocessing.extract_nouns_from_text(candidate.kb_abstract)
                 logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: \n\n\n".format(
                     candidate.freebase_id,
