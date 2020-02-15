@@ -217,11 +217,10 @@ def main():
             candidates = remove_candidates_without_abstracts(candidates)
             logger.info("===============  Candidates ==================")
             for candidate in candidates:
+                # concatenate the english abstract of one candidate
+                abstract = " ".join(candidate.kb_abstract)
                 # extract the nouns from the abstract
-                print "================================================================"
-                print type(candidate.kb_abstract)
-                print "================================================================"
-                candidate.kb_nouns = preprocessing.extract_nouns_from_text(candidate.kb_abstract)
+                candidate.kb_nouns = preprocessing.extract_nouns_from_text(abstract)
                 logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: \n\n\n".format(
                     candidate.freebase_id,
                     candidate.freebase_label,
