@@ -1,0 +1,8 @@
+# remove log files
+*.log
+
+# remove .idea folder
+.idea/*
+
+# remove stanford-ner library
+/exist-stanford-ner/
