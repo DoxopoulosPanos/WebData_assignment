@@ -37,7 +37,15 @@ echo "Trident should be running now on node $KB_NODE:$KB_PORT (connected to proc
 #python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 #prun -v -np 1 python preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
-prun -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
+if [ $# -eq 0 ]
+  then
+    echo "NO arguments supplied. Using the file /var/scratch/wdps1934/wdps/data/sample.warc.gz as input"
+    prun -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
+  else
+    # argument is given
+    prun -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT $1
+fi
+
 #prun -v -np 1 python linker.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 
