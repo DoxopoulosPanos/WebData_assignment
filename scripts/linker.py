@@ -261,7 +261,7 @@ def main():
                     # change best candidate
                     candidate_with_best_score = candidate
 
-            logger.info(" -------------   Candidate with BEST score for {} -------------  ".format(ELS_QUERY))
+            logger.info(" -------------   Candidate with BEST score for {} -------------  ".format(doc_entity))
             logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
                 candidate_with_best_score.freebase_id,
                 candidate_with_best_score.freebase_label,
