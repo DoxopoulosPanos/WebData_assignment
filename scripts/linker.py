@@ -145,7 +145,6 @@ def build_kb_query_for_abstracts(candidate_id, limit=10):
             "?s <http://www.w3.org/2002/07/owl#sameAs> ?o ." \
             "?o <http://dbpedia.org/ontology/abstract> ?abstract." \
             "{}".format("{", candidate_id, "}")
-    print "build QUERY: {}".format(query)
     return query
 
 
@@ -269,7 +268,7 @@ def main():
                 candidate_with_best_score.kb_nouns,
                 candidate_with_best_score.similarity_score))
 
-            print "{}       {}    {}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
+            print "{}    {}    {}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
 
 
 if __name__ == '__main__':
