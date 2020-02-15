@@ -228,9 +228,6 @@ def main():
             logger.debug("===============  Elastic search ==================")
             logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
-            # if candidates not found move to the next word
-            if not candidates:
-                continue
             log_candidates(candidates, "debug")
             logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
@@ -242,6 +239,9 @@ def main():
                 logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
             logger.debug("===============  END of Trident ==================")
             candidates = remove_candidates_without_abstracts(candidates)
+            # if candidates not found (or removed) move to the next word
+            if not candidates:
+                continue
             logger.info("===============  Candidates ==================")
             # initialise the best candidate
             candidate_with_best_score = candidates[0]
@@ -264,12 +264,11 @@ def main():
 
             logger.info(" -------------   Candidate with BEST score for {} -------------  ".format(ELS_QUERY))
             logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
-                candidate.freebase_id,
-                candidate.freebase_label,
-                candidate.kb_abstract,
-                candidate.kb_nouns,
-                candidate.similarity_score))
-
+                candidate_with_best_score.freebase_id,
+                candidate_with_best_score.freebase_label,
+                candidate_with_best_score.kb_abstract,
+                candidate_with_best_score.kb_nouns,
+                candidate_with_best_score.similarity_score))
 
 
 if __name__ == '__main__':
