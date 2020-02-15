@@ -174,7 +174,7 @@ def remove_candidates_without_abstracts(candidates):
     """
     new_candidates = []
     for candidate in candidates:
-        if not candidate.kb_abstract:
+        if candidate.kb_abstract:
             # if candidate has abstract append him in the new list
             new_candidates.append(candidate)
 

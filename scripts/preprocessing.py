@@ -270,6 +270,7 @@ def extract_nouns_from_text(text):
     # tokenize
     tokens = tokenizer(text)
     tokens = [remove_hex_from_string(x) for x in tokens]
+    logger.error(tokens)
 
     tokens_without_numbers = []
     for token in lemmatization(tokens):  # implement stemming
@@ -292,7 +293,7 @@ def extract_nouns_from_text(text):
         if len(tagged_word[0]) > 2:  # remove words with length < 3
             tokens_after_stop_word_removal.append(tagged_word)
 
-    del token_without_numbers
+    del tokens_without_numbers
 
     all_NNP_words = []
     for word in tokens_after_stop_word_removal:
