@@ -228,6 +228,9 @@ def main():
             logger.debug("===============  Elastic search ==================")
             logger.debug("Candidates for [{}]".format(ELS_QUERY))
             candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
+            # if candidates not found move to the next word
+            if not candidates:
+                continue
             log_candidates(candidates, "debug")
             logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
