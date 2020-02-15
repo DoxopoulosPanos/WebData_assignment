@@ -303,7 +303,7 @@ def extract_nouns_from_text(text):
     for tagged_word in groups:
         logger.info(tagged_word)  # all are NNP
         all_NNP_words.append(tagged_word)
-    logger.error(all_NNP_words)
+
     return all_NNP_words
 
 

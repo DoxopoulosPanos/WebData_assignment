@@ -220,7 +220,7 @@ def main():
                 abstract = " ".join(candidate.kb_abstract)
                 # extract the nouns from the abstract
                 candidate.kb_nouns = preprocessing.extract_nouns_from_text(abstract)
-                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: \n\n\n".format(
+                logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n\n".format(
                     candidate.freebase_id,
                     candidate.freebase_label,
                     candidate.kb_abstract,
