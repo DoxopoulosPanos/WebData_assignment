@@ -221,13 +221,12 @@ def main():
 
     # for each word in each document find the potential candidates by using elastic search.
     # For each candidate query trident KB and keep only the english abstracts from the results
-    for document_results in preprocessing.main(WARC_FILE):
+    for warc_id, document_results in preprocessing.main(WARC_FILE):
         logger.info("============  DOCUMENT  ==============")
-        for ELS_QUERY in document_results:
-            print "looking for candidates for word {}".format(ELS_QUERY)
+        for doc_entity in document_results:
             logger.debug("===============  Elastic search ==================")
-            logger.debug("Candidates for [{}]".format(ELS_QUERY))
-            candidates = find_candidates(ELS_DOMAIN, ELS_QUERY)
+            logger.debug("Candidates for [{}]".format(doc_entity))
+            candidates = find_candidates(ELS_DOMAIN, doc_entity)
             log_candidates(candidates, "debug")
             logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
@@ -269,6 +268,8 @@ def main():
                 candidate_with_best_score.kb_abstract,
                 candidate_with_best_score.kb_nouns,
                 candidate_with_best_score.similarity_score))
+
+            print "{}       {}    {}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
 
 
 if __name__ == '__main__':

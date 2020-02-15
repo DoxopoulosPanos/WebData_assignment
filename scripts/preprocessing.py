@@ -385,7 +385,7 @@ def main(warc_filename):
             if __name__ == "__main__":
                 print all_NNP_words
             else:
-                yield all_NNP_words
+                yield warc_id, all_NNP_words
 
             del tokens_after_stop_word_removal
             del all_NNP_words
