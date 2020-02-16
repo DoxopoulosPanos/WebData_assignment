@@ -315,7 +315,7 @@ def main(warc_filename):
     """
     warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
-    max_records = 4
+    max_records = 6
     for record in split_records(warcfile):
         if record_no < max_records:
             record_no += 1
@@ -325,8 +325,7 @@ def main(warc_filename):
             if not record:  # if empty
                 logger.debug("EMPTY")
                 continue
-            if record_no == 2 or record_no == 3:
-                continue
+
             soup = BeautifulSoup(record, "lxml")
             #logger.info(soup.text)
             logger.info("==================================")
