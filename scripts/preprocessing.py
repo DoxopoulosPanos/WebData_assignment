@@ -343,51 +343,15 @@ def main(warc_filename):
             lines = remove_code_blocks(body)
             # join all lines together
             body = " ".join(lines)
-            # tokenize
-            tokens = tokenizer(body) # TODO: all the following block of code should be replaced
-            tokens = [remove_hex_from_string(x) for x in tokens]
-            logger.info("======================+++++++++++++++++++++++++++++++")
 
-            tokens_without_numbers = []
-            for token in lemmatization(tokens):          # implement stemming
-                token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
-                token_without_numbers = remove_number_from_string(token_without_alpha)
-                if token_without_numbers is not "":         # remove empty strings
-                    tokens_without_numbers.append(token_without_numbers)
-            logger.info("--------------------------")
-
-            # ------------------------------------
-            # POS tagging
-            tagged = pos_tagging(tokens_without_numbers)
-            groups = group_consecutive_groups(tagged)
-
-            # ------------------------------------
-
-            # stop word removal
-            tokens_after_stop_word_removal = []
-
-            for tagged_word in remove_stop_words(tagged):         # remove stop words (x[0] = word , x[1]= POS)
-                if len(tagged_word[0]) > 2:               # remove words with length < 3
-                    tokens_after_stop_word_removal.append(tagged_word)
-
-            del token_without_numbers
-
-            all_NNP_words = []
-            for word in tokens_after_stop_word_removal:
-                if word[1] == "NNP":
-                    logger.info(word[0])
-                    all_NNP_words.append(word[0])
-            logger.info('====dddddddddddddddddddddddddddd===================================')
-            for tagged_word in groups:
-                logger.info(tagged_word)            # all are NNP
-                all_NNP_words.append(tagged_word)
+            #preprocess the text
+            all_NNP_words = extract_nouns_from_text(body)
 
             if __name__ == "__main__":
                 print all_NNP_words
             else:
                 yield warc_id, all_NNP_words
 
-            del tokens_after_stop_word_removal
             del all_NNP_words
 
             logger.info("--------------------------")
