@@ -128,8 +128,10 @@ def split_headers(doc):
     if "Content-Type: text/html; charset=UTF-8" in doc:
         headers, body = doc.split("Content-Type: text/html; charset=UTF-8")
     else:
-        logger.warning("Missed document in split headers")
+        logger.warning("Missed the following document in split headers")
+        logger.warning(doc)
         logger.debug("Document does not have Content-Type value")
+        return None, None
 
     return headers, body
 
@@ -331,6 +333,9 @@ def main(warc_filename):
             logger.info("==================================")
             # split headers from body
             headers, body = split_headers(soup.text)
+            # if split could not be achieved go to the nect record
+            if body is None:
+                continue
             # # HEADERS preprocessing
             warc_id = find_id(headers)
             if not warc_id:  # if empty
