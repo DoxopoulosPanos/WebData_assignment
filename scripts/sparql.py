@@ -14,15 +14,14 @@ def sparql(domain, query):
     :return:
     """
     url = 'http://%s/sparql' % domain
-    try:
-        response = requests.post(url, data={'print': True, 'query': query})
-    except Exception as e:
-        raise e
-
+    response = requests.post(url, data={'print': True, 'query': query})
     if response:
-        response = response.json()
-        #print(json.dumps(response, indent=2))
-
+        try:
+            response = response.json()
+            #print(json.dumps(response, indent=2))
+        except Exception as e:
+            print(response)
+            raise e
 
     return response
 

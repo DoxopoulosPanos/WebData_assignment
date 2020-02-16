@@ -135,7 +135,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
         # run again the query
         sparql_results = sparql.sparql(sql_domain, query)
 
-    return sparql_results
+    return sparql.sparql(sql_domain, query)
 
 
 def build_kb_query(candidate_id, limit=10):
