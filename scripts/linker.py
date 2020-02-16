@@ -80,9 +80,8 @@ def find_candidates(ELS_DOMAIN, ELS_QUERY):
     try:
         els_results = els.search(ELS_DOMAIN, ELS_QUERY).items()
     except Exception as e:
-        ES_DOMAIN, KB_DOMAIN = process_run()
+        ES_DOMAIN, KB_DOMAIN = process_run.run()
         ELS_DOMAIN = ES_DOMAIN
-        ELS_QUERY = KB_DOMAIN
         els_results = els.search(ELS_DOMAIN, ELS_QUERY).items()
 
     for freebase_id, labels in els_results:
@@ -131,7 +130,7 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     try:
         sparql_results = sparql.sparql(sql_domain, query)
     except Exception as e:
-        ES_DOMAIN, KB_DOMAIN = process_run()
+        ES_DOMAIN, KB_DOMAIN = process_run.run()
         sql_domain = KB_DOMAIN
         # run again the query
         sparql_results = sparql.sparql(sql_domain, query)
