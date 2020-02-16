@@ -4,6 +4,7 @@ import requests
 def search(domain, query, size=20):
     url = 'http://%s/freebase/label/_search' % domain
     response = requests.get(url, params={'q': query, 'size': size})
+
     id_labels = {}
     if response:
         response = response.json()
