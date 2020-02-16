@@ -36,6 +36,7 @@ KB_PID=$!
 
 #python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
+#prun -v -np 1 python preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
 if [ $# -eq 0 ]
   then
     echo "NO arguments supplied. Using the file /var/scratch/wdps1934/wdps/data/sample.warc.gz as input"

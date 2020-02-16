@@ -6,13 +6,9 @@ import elasticsearch as els
 import sparql
 import preprocessing
 import entity
-import process_run
 
 #  define logger as global variable
 logger = logging.getLogger(__name__)
-
-ES_DOMAIN = ""
-KB_DOMAIN = ""
 
 
 ########################################################
@@ -68,25 +64,16 @@ def set_logger(stream_level="info", file_level="error", log_filename="file.log")
 ########################################################
 #              elastic search functions                #
 ########################################################
-def find_candidates(ELS_DOMAIN, ELS_QUERY):
+def find_candidates(ES_DOMAIN, ES_QUERY):
     """
     This function calls elastic search script in order to find all possible candidates for the given ELS_QUERY
-    :param ELS_DOMAIN: ELS_NODE:ELS_PORT
-    :param ELS_QUERY:  string (e.g. "Vrije University")
+    :param ES_DOMAIN: ELS_NODE:ELS_PORT
+    :param ES_QUERY:  string (e.g. "Vrije University")
     :return:
     """
-    global ES_DOMAIN, KB_DOMAIN
     total_entities = []
-    try:
-        els_results = els.search(ELS_DOMAIN, ELS_QUERY).items()
-    except Exception as e:
-        ES_DOMAIN, KB_DOMAIN = process_run()
-        ELS_DOMAIN = ES_DOMAIN
-        ELS_QUERY = KB_DOMAIN
-        els_results = els.search(ELS_DOMAIN, ELS_QUERY).items()
-
-    for freebase_id, labels in els_results:
-        my_entity = entity.Entity(ELS_QUERY)
+    for freebase_id, labels in els.search(ES_DOMAIN, ES_QUERY).items():
+        my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
 
@@ -120,22 +107,10 @@ def get_kb_info_by_candidate(sql_domain, candidate_id):
     :param candidate_id: the freebase_id of a candidate as returned from elastic search
     :return:
     """
-    global ES_DOMAIN, KB_DOMAIN
-
     # build query
     #query = build_kb_query(candidate_id, limit=10)
     query = build_kb_query_for_abstracts(candidate_id, limit=10)
     #print "query = {}".format(query)
-
-    total_entities = []
-    try:
-        sparql_results = sparql.sparql(sql_domain, query)
-    except Exception as e:
-        ES_DOMAIN, KB_DOMAIN = process_run()
-        sql_domain = KB_DOMAIN
-        # run again the query
-        sparql_results = sparql.sparql(sql_domain, query)
-
     return sparql.sparql(sql_domain, query)
 
 
@@ -233,14 +208,12 @@ def main():
     Main function
     :return:
     """
-    global ES_DOMAIN, KB_DOMAIN
-
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
     preprocessing.set_logger(stream_level="error", file_level="info", log_filename="file2.log")
 
     try:
-        _, ES_DOMAIN, KB_DOMAIN, WARC_FILE = sys.argv
+        _, ELS_DOMAIN, SQL_DOMAIN, WARC_FILE = sys.argv
     except Exception as e:
         print('Usage: python elasticsearch.py DOMAIN QUERY')
         sys.exit(0)
@@ -252,12 +225,12 @@ def main():
         for doc_entity in document_results:
             logger.debug("===============  Elastic search ==================")
             logger.debug("Candidates for [{}]".format(doc_entity))
-            candidates = find_candidates(ES_DOMAIN, doc_entity)
+            candidates = find_candidates(ELS_DOMAIN, doc_entity)
             log_candidates(candidates, "debug")
             logger.debug("================End of ES -- Start of Trident=================")
             for candidate in candidates:
                 logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
-                trident_response = get_kb_info_by_candidate(KB_DOMAIN, candidate.freebase_id)
+                trident_response = get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
                 #logger.info(json.dumps(trident_response, indent=2))
                 # extract only English abstract
                 candidate.kb_abstract = get_only_english_abstract_from_json(trident_response)
