@@ -210,7 +210,7 @@ def main():
     """
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
-    preprocessing.set_logger(stream_level="error", file_level="error", log_filename="file2.log")
+    preprocessing.set_logger(stream_level="error", file_level="info", log_filename="file2.log")
 
     try:
         _, ELS_DOMAIN, SQL_DOMAIN, WARC_FILE = sys.argv

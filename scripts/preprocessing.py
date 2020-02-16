@@ -327,7 +327,7 @@ def main(warc_filename):
                 continue
 
             soup = BeautifulSoup(record, "lxml")
-            #logger.info(soup.text)
+            logger.info(soup.text)
             logger.info("==================================")
             # split headers from body
             headers, body = split_headers(soup.text)
