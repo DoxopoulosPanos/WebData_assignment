@@ -25,6 +25,7 @@ def prerequisites():
     nltk.download('stopwords')
     nltk.download('wordnet')
     nltk.download('averaged_perceptron_tagger')
+    nltk.download('maxent_ne_chunker')
 
 
 ########################################################
@@ -227,6 +228,7 @@ def remove_number_from_string(word_token):
     return ''.join([i for i in word_token if not i.isdigit()])
 
 
+# #########################################################  POS tagging
 def pos_tagging(word_tokens):
     """
     This function uses nltk library in order to perform POS tagging
@@ -258,6 +260,22 @@ def group_consecutive_groups(tagged):
     names = [" ".join(name) for name in names if len(name) >= 2]
 
     return names
+
+
+# #########################################################  NER tagging
+def find_NER_type(tokenized_text):
+    """
+    Named Entity Recognition.
+    Finds the NER type of each token
+    :param tokenized_text:
+    :return:
+    """
+    from nltk.tag import StanfordNERTagger
+    st = StanfordNERTagger('../exist-stanford-ner/resources/classifiers/english.all.3class.distsim.crf.ser.gz',
+                           '../exist-stanford-ner/java/lib/stanford-ner-2015-04-20.jar', encoding='utf-8')
+    classified_text = st.tag(tokenized_text)
+
+    return classified_text
 
 
 ########################################################
@@ -363,7 +381,7 @@ def main(warc_filename):
         else:
             logger.debug("record_no = {}".format(max_records))
             logger.debug("Exiting...")
-            exit(0)
+            break
 
 
 if __name__ == "__main__":
