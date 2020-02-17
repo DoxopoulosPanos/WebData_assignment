@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" data-template="templates:surround" data-template-with="templates/page.html" data-template-at="content">
+    <h1>Stanford NER XQuery Module</h1>
+    <p>An XQuery module to integrate the <a href="http://nlp.stanford.edu/software/CRF-NER.shtml">Stanford Named Entity Recognizer</a>
+    into eXist-db. The package can be installed via the package manager in the eXist dashboard or you can <a href="building.html">build</a>
+        it yourself.
+    </p>
+    <h2>Examples</h2>
+    <p>The module basically provides two functions:</p>
+    <ol>
+        <li>
+            <code>classify-string</code>: takes a plain string and returns a sequence of text nodes and elements. Recognized entities are wrapped into
+            an element having the same name as the corresponding category  
+        </li>
+        <li>
+            <code>classify-node</code>: recursively enhances a node (text node, element or entire document) by wrapping all entities into an element. 
+            The structure of the original XML is preserved.
+        </li>
+    </ol>
+    <p>For all functions you have to define the serialized classifier model to use in the first argument. The classifier model is a binary resource and can be stored in the 
+    database. It is referenced via an xs:anyURI. There are various models, which will produce different output, depending on which data set they
+    have been trained. Stanford NER also allows you to train your own classifiers.
+    </p>
+    <h3>String Processing</h3>
+    <p>
+        <code>classify-string</code> takes a simple string an returns a sequence of text nodes and elements. An element is returned for each
+        identified entity. It has the same name (in lower case) as the category reported by NER.
+    </p>
+    <pre class="app:display-source">xquery version "3.0";
+
+import module namespace ner="http://exist-db.org/xquery/stanford-ner";
+
+let $classifier := xs:anyURI("/db/apps/stanford-ner/resources/classifiers/english.muc.7class.distsim.crf.ser.gz")
+let $text := "PRISM was first publicly revealed when classified documents about the program were leaked to journalists of the The Washington Post and The Guardian by Edward Snowden – at the time an NSA contractor – during a visit to Hong Kong."
+return
+    ner:classify-string($classifier, $text)
+</pre>
+    <h3>Node Processing</h3>
+    <h4>Simple Version</h4>
+    <p>The two-argument version of <code>classify-node</code> wraps entities into simple elements having the same name as the corresponding category
+        reported by Stanford NER.
+    </p>
+    <pre class="app:display-source">xquery version "3.0";
+
+import module namespace ner="http://exist-db.org/xquery/stanford-ner";
+
+let $classifier := xs:anyURI("/db/apps/stanford-ner/resources/classifiers/english.muc.7class.distsim.crf.ser.gz")
+let $text := &lt;p&gt;PRISM was first publicly revealed when classified documents about the program were leaked to journalists of the The Washington Post and The Guardian by Edward Snowden – at the time an NSA contractor – during a visit to Hong Kong.&lt;/p&gt;
+return
+    ner:classify-node($classifier, $text)
+</pre>
+    <h4>Using a Callback Function</h4>
+    <p>You can control the output generated for each entity by providing a callback function. It will be called once for every entity and should take
+        to parameters:
+    </p>
+    <ul>
+        <li>$tag: the name of the tag or category reported for this entity by NER. Note that the recognized tags differ depending on the classifier
+            used.
+        </li>
+        <li>$content: the text content of the entity.</li>
+    </ul>
+    <pre class="app:display-source?type=html">xquery version "3.0";
+
+import module namespace ner="http://exist-db.org/xquery/stanford-ner";
+
+let $classifier := xs:anyURI("/db/apps/stanford-ner/resources/classifiers/english.muc.7class.distsim.crf.ser.gz")
+let $text := &lt;p&gt;PRISM was first publicly revealed when classified documents about the program were leaked to journalists of the The Washington Post and The Guardian by Edward Snowden – at the time an NSA contractor – during a visit to Hong Kong.&lt;/p&gt;
+return
+    ner:classify-node($classifier, $text, function($tag, $content) {
+        &lt;span class="{lower-case($tag)}"&gt;{$content}&lt;/span&gt;
+    })
+</pre>
+    <h2>Support for other Languages</h2>
+    <p>From the <a href="http://nlp.stanford.edu/software/CRF-NER.shtml">Stanford NLP website</a>, you can download two additional classifier models: one for 
+    German and one for Chinese. While the German model should work out of the box if you load the corresponding resource into the db, Chinese text has to be 
+    segmented first. We provide variants of the two XQuery functions which deal with the segmentation step: <code>ner:classify-string-cn</code> and
+    <code>ner:classify-node-cn</code>.</p>
+    <p>Please read the Chinese Language Support section in the <a href="building.html">build documentation</a>.</p>
+</div>
