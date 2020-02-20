@@ -7,6 +7,7 @@ from bs4 import Comment
 
 #  define logger as global variable
 import linker
+import scapy_entity
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +187,7 @@ def preprocess(warc_filename):
     """
     warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
-    max_records = 20
+    max_records = 20  #TODO: change
     for record in split_records(warcfile):
         if record_no < max_records:
             record_no += 1
@@ -201,9 +202,11 @@ def preprocess(warc_filename):
             logger.info("==================================")
             # split headers from body
             headers, body = split_headers(soup.text)
+
             # if split could not be achieved go to the nect record
             if body is None:
                 continue
+
             # # HEADERS preprocessing
             warc_id = find_id(headers)
             if not warc_id:  # if empty
@@ -214,10 +217,12 @@ def preprocess(warc_filename):
             # # preprocessing
             body = clear_text(body)
             for entity in spacy_ner(body):
-                #logger.info(entity)
-                yield warc_id, entity
-
-
+                print entity
+                mention = scapy_entity.Mention(name=entity[0], warc_id=warc_id)
+                mention.ner_label = entity[1]
+                logger.info(mention)
+                continue
+                #yield mention
 
 
 if __name__ == "__main__":
@@ -233,4 +238,4 @@ if __name__ == "__main__":
         logger.error("Please provide a filename as input")
         raise IOError
 
-    preprocess(sys.argv[1])
+    preprocess(filename)

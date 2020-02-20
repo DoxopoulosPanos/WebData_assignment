@@ -3,6 +3,7 @@ import logging
 
 from scapy_preprocessing import preprocess
 import linker
+import preprocessing
 
 
 #  define logger as global variable
@@ -64,10 +65,6 @@ def main():
     Main function
     :return:
     """
-    """
-        Main function
-        :return:
-        """
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file_scapy.log")
 
@@ -79,7 +76,7 @@ def main():
 
     # for each word in each document find the potential candidates by using elastic search.
     # For each candidate query trident KB and keep only the english abstracts from the results
-    for warc_id, document_entity in preprocess.main(WARC_FILE):
+    for warc_id, document_entity in preprocess(WARC_FILE):
         doc_entity = document_entity[0]
         logger.debug("===============  Elastic search ==================")
         logger.debug("Candidates for [{}]".format(doc_entity))
@@ -96,8 +93,6 @@ def main():
         logger.debug("===============  END of Trident ==================")
         candidates = linker.remove_candidates_without_abstracts(candidates)
         # if candidates not found (or removed) move to the next word
-        print candidates    # TODO: these 2 lines should be removed
-        continue
         if not candidates:
             continue
         logger.info("===============  Candidates ==================")
@@ -108,7 +103,7 @@ def main():
             abstract = " ".join(candidate.kb_abstract)
             # extract the nouns from the abstract
             candidate.kb_nouns = preprocessing.extract_nouns_from_text(abstract)
-            candidate.similarity_score = similarity_measure(document_results, candidate.kb_nouns)
+            candidate.similarity_score = preprocessing.similarity_measure(document_results, candidate.kb_nouns)
             logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
                 candidate.freebase_id,
                 candidate.freebase_label,
@@ -128,7 +123,7 @@ def main():
             candidate_with_best_score.kb_nouns,
             candidate_with_best_score.similarity_score))
 
-            print "{}\t{}\t{}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
+        print "{}\t{}\t{}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
 
 
 if __name__ == '__main__':
