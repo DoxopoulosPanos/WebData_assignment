@@ -338,9 +338,9 @@ def main(warc_filename):
     max_records = 8
     for record in split_records(warcfile):
         if record_no < max_records:
+            record_no += 1
             if record_no < 6:       # TODO: to be removed
                 continue            # TODO: to be removed
-            record_no += 1
             logger.debug("record_no < {}".format(max_records))
 
             logger.info("----------- Document No {}---------------".format(record_no))
