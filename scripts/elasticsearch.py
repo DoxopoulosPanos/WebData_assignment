@@ -35,15 +35,10 @@ def get_best_candidates(domain, query, results_No=10):
             score = hit.get('_score')
             id_labels.append([freebase_id, score, freebase_label])
 
-        print id_labels
-        print "--------------------------------------------"
-
         # find the top 10 according to the score
         id_labels = sorted(id_labels, key=lambda x: x[1], reverse=True)       # sort entries in list according to 2nd value (score)
         for i in range(results_No):
             best_id_labels.setdefault(id_labels[i][0], set()).add(id_labels[i][2])
-
-        print best_id_labels
 
     return best_id_labels
 
