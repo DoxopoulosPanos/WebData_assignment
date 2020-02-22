@@ -38,8 +38,11 @@ def get_best_candidates(domain, query, results_No=10):
         # find the top 10 according to the score
         id_labels = sorted(id_labels, key=lambda x: x[1], reverse=True)       # sort entries in list according to 2nd value (score)
         for i in range(results_No):
-            if len(id_labels[i]) == 3:
+            try:
                 best_id_labels.setdefault(id_labels[i][0], set()).add(id_labels[i][2])
+            except:
+                # candidates found less than results_No
+                break
 
     return best_id_labels
 
