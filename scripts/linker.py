@@ -72,7 +72,8 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
     :return:
     """
     total_entities = []
-    for freebase_id, labels in els.search(ES_DOMAIN, ES_QUERY).items():
+    # 2 options els.get_best_candidates() or els.search()
+    for freebase_id, labels in els.get_best_candidates(ES_DOMAIN, ES_QUERY).items():
         my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
