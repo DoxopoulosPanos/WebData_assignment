@@ -293,6 +293,9 @@ def extract_nouns_from_text(text):
 
     tokens_without_numbers = []
     for token in lemmatization(tokens):  # implement stemming
+        if token == "AIDS":
+            print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            print(token)
         token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
         token_without_numbers = remove_number_from_string(token_without_alpha)
         if token_without_numbers is not "":  # remove empty strings
@@ -341,7 +344,7 @@ def main(warc_filename):
     for record in split_records(warcfile):
         if record_no < max_records:
             record_no += 1
-            if record_no < 9:       # TODO: to be removed
+            if record_no < 8:       # TODO: to be removed
                 continue            # TODO: to be removed
             logger.debug("record_no < {}".format(max_records))
 
