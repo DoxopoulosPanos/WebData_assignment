@@ -337,53 +337,53 @@ def main(warc_filename):
     """
     warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
-    max_records = 10
+    #max_records = 10
     for record in split_records(warcfile):
-        if record_no < max_records:
-            record_no += 1
-            logger.debug("record_no < {}".format(max_records))
+        #if record_no < max_records:
+        record_no += 1
+        #logger.debug("record_no < {}".format(max_records))
 
-            logger.info("----------- Document No {}---------------".format(record_no))
-            if not record:  # if empty
-                logger.debug("EMPTY")
-                continue
+        logger.info("----------- Document No {}---------------".format(record_no))
+        if not record:  # if empty
+            logger.debug("EMPTY")
+            continue
 
-            soup = BeautifulSoup(record, "lxml")
-            logger.info(soup.text)
-            logger.info("==================================")
-            # split headers from body
-            headers, body = split_headers(soup.text)
-            # if split could not be achieved go to the nect record
-            if body is None:
-                continue
-            # # HEADERS preprocessing
-            warc_id = find_id(headers)
-            if not warc_id:  # if empty
-                logger.debug("No ID. This file will be skipped")
-                continue
-            logger.info("ID: {}".format(warc_id))
-            # # BODY preprocessing
-            # remove code blocks
-            lines = remove_code_blocks(body)
-            # join all lines together
-            body = " ".join(lines)
+        soup = BeautifulSoup(record, "lxml")
+        logger.info(soup.text)
+        logger.info("==================================")
+        # split headers from body
+        headers, body = split_headers(soup.text)
+        # if split could not be achieved go to the nect record
+        if body is None:
+            continue
+        # # HEADERS preprocessing
+        warc_id = find_id(headers)
+        if not warc_id:  # if empty
+            logger.debug("No ID. This file will be skipped")
+            continue
+        logger.info("ID: {}".format(warc_id))
+        # # BODY preprocessing
+        # remove code blocks
+        lines = remove_code_blocks(body)
+        # join all lines together
+        body = " ".join(lines)
 
-            #preprocess the text
-            all_NNP_words = extract_nouns_from_text(body)
+        #preprocess the text
+        all_NNP_words = extract_nouns_from_text(body)
 
-            if __name__ == "__main__":
-                print all_NNP_words
-            else:
-                yield warc_id, all_NNP_words
-
-            del all_NNP_words
-
-            logger.info("--------------------------")
-            logger.info("--------------------------")
+        if __name__ == "__main__":
+            print all_NNP_words
         else:
-            logger.debug("record_no = {}".format(max_records))
-            logger.debug("Exiting...")
-            break
+            yield warc_id, all_NNP_words
+
+        del all_NNP_words
+
+        logger.info("--------------------------")
+        logger.info("--------------------------")
+    else:
+        logger.debug("record_no = {}".format(max_records))
+        logger.debug("Exiting...")
+        break
 
 
 if __name__ == "__main__":

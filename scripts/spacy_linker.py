@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from scapy_preprocessing import preprocess
+from spacy_preprocessing import preprocess
 import linker
 import preprocessing
 
@@ -66,7 +66,7 @@ def main():
     :return:
     """
     # set loggers
-    set_logger(stream_level="error", file_level="info", log_filename="file_scapy.log")
+    set_logger(stream_level="error", file_level="info", log_filename="file_spacy.log")
 
     try:
         _, ELS_DOMAIN, SQL_DOMAIN, WARC_FILE = sys.argv

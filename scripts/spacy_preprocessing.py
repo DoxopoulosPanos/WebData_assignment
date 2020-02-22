@@ -7,7 +7,7 @@ from bs4 import Comment
 
 #  define logger as global variable
 import linker
-import scapy_entity
+import spacy_entity
 
 logger = logging.getLogger(__name__)
 
@@ -218,7 +218,7 @@ def preprocess(warc_filename):
             body = clear_text(body)
             for entity in spacy_ner(body):
                 print entity
-                mention = scapy_entity.Mention(name=entity[0], warc_id=warc_id)
+                mention = spacy_entity.Mention(name=entity[0], warc_id=warc_id)
                 mention.ner_label = entity[1]
                 logger.info(mention)
                 continue

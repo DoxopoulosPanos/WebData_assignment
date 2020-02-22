@@ -180,13 +180,13 @@ def remove_candidates_without_abstracts(candidates):
     return new_candidates
 
 
-def similarity_measure(list1, list2, threeshold=0.8):
+def similarity_measure(list1, list2, threshold=0.8):
     """
     This function calculates a score based on the hamming distance between the words in the two lists.
     If the similarity between two words is above the threeshold then it is calculated as similar
     :param list1: list of stings
     :param list2: list of strings
-    :param threeshold:
+    :param threshold:
     :return: a score (float)
     """
     import textdistance
