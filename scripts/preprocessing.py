@@ -380,10 +380,10 @@ def main(warc_filename):
 
         logger.info("--------------------------")
         logger.info("--------------------------")
-    else:
-        logger.debug("record_no = {}".format(max_records))
-        logger.debug("Exiting...")
-        break
+    # else:
+    #     logger.debug("record_no = {}".format(max_records))
+    #     logger.debug("Exiting...")
+    #     break
 
 
 if __name__ == "__main__":
