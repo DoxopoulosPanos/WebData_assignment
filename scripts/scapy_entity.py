@@ -4,6 +4,9 @@ This module implements the classes Mention and Candidate
 
 
 class Entity(object):
+    """
+    Parent Class of Mention and Candidate
+    """
 
     def __init__(self, name):
         self.name = name
@@ -11,6 +14,9 @@ class Entity(object):
 
 
 class Mention(Entity):
+    """
+    This class implements the mentions detected in each document
+    """
 
     def __init__(self, name, warc_id):
         super(Mention, self).__init__(name)
@@ -23,6 +29,9 @@ class Mention(Entity):
 
 
 class Candidate(Entity):
+    """
+    This class implements the candidates found after querying the Knowledge Base
+    """
 
     def __init__(self, name):
         super(Candidate, self).__init__(name)

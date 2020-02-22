@@ -46,7 +46,7 @@ if [ $# -eq 0 ]
     prun -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT $1
 fi
 
-#prun -v -np 1 python linker.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
+#prun -v -np 1 python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
 
 
 # kill elastic search server
