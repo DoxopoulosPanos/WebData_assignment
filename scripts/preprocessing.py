@@ -309,7 +309,9 @@ def extract_nouns_from_text(text):
     tokens_after_stop_word_removal = []
 
     for tagged_word in remove_stop_words(tagged):  # remove stop words (x[0] = word , x[1]= POS)
-        if len(tagged_word[0]) > 2:  # remove words with length < 3
+        # remove words with length < 3   and they are not capital letters
+        # if word is capital characters it could be an acronym (e.g. DOD)
+        if len(tagged_word[0]) > 2 or tagged_word[0].isupper():
             tokens_after_stop_word_removal.append(tagged_word)
 
     del tokens_without_numbers

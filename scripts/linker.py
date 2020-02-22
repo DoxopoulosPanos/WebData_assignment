@@ -77,7 +77,7 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
         my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
-
+        logger.info(my_entity)
         total_entities.append(my_entity)
     return total_entities
 
