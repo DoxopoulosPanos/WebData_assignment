@@ -4,14 +4,17 @@ import gzip
 import re
 from bs4 import BeautifulSoup
 
-#  define logger as global variable
-logger = logging.getLogger(__name__)
+# TWO methods are implemented
+METHOD = 2
 
 # define KEYNAME for records
 KEYNAME = "WARC-TREC-ID"
 
 # install nltk prerequisites
 INSTALL_PREREQUISITES = True
+
+#  define logger as global variable
+logger = logging.getLogger(__name__)
 
 
 def prerequisites():
@@ -278,6 +281,28 @@ def find_NER_type(tokenized_text):
     return classified_text
 
 
+def get_entities_from_pos_tagged(pos_tagged_text):
+    """
+    NER tagging
+    Using the module ne_chunk of nltk library, this function implements NER tagging and classifies as NE all tokens that
+     have been labelled as PERSON, ORGANIZATION, and GPE
+    :param pos_tagged_text: a list of tokens after as retrieved from pos_tag function of nltk
+    :return: a list of the entities found
+    """
+    from nltk import ne_chunk
+    from nltk import Tree
+
+    entities = {}
+
+    chunks = ne_chunk(pos_tagged_text)
+    for chunk in chunks:
+        if type(chunk) is Tree:
+            t = ' '.join(c[0] for c in chunk.leaves())
+            entities[t] = chunk.label()
+
+    return entities
+
+
 ########################################################
 ########################################################
 def extract_nouns_from_text(text):
@@ -301,9 +326,18 @@ def extract_nouns_from_text(text):
     # ------------------------------------
     # POS tagging
     tagged = pos_tagging(tokens_without_numbers)
-    groups = group_consecutive_groups(tagged)
-
     # ------------------------------------
+
+    # METHOD 2 uses the ne_chunk NER tagger
+    if METHOD == 2:
+        # ----------------------------------------------
+        # NER tagging
+        entities = get_entities_from_pos_tagged(tagged)
+        # ----------------------------------------------
+        return entities
+
+    # group consecutive_words
+    groups = group_consecutive_groups(tagged)
 
     # stop word removal
     tokens_after_stop_word_removal = []
