@@ -269,6 +269,11 @@ def main():
                 candidate_with_best_score.kb_nouns,
                 candidate_with_best_score.similarity_score))
 
+            # if the candidate has similarity score less than 0.02 then it is considered as Unlinkable Mention Entity
+            # after many experiments we conclude that the results with such a low are false positives
+            if candidate_with_best_score.similarity_score < 0.2:
+                continue
+
             print "{}\t{}\t{}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
 
 
