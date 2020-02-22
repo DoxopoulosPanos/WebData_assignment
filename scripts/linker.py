@@ -195,7 +195,7 @@ def similarity_measure(list1, list2, threshold=0.8):
 
     for word1 in list1:
         for word2 in list2:
-            if textdistance.hamming.normalized_similarity(word1, word2) > threeshold:
+            if textdistance.hamming.normalized_similarity(word1, word2) > threshold:
                 # word is similar (above the threeshold)
                 score += 1
     # calculate the normalized score
