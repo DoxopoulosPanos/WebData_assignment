@@ -287,7 +287,7 @@ def get_entities_from_pos_tagged(pos_tagged_text):
     Using the module ne_chunk of nltk library, this function implements NER tagging and classifies as NE all tokens that
      have been labelled as PERSON, ORGANIZATION, and GPE
     :param pos_tagged_text: a list of tokens after as retrieved from pos_tag function of nltk
-    :return: a list of the entities found
+    :return: a dictionary of the entities found and the NER type {"word":"type",}
     """
     from nltk import ne_chunk
     from nltk import Tree
@@ -332,7 +332,8 @@ def extract_nouns_from_text(text):
     if METHOD == 2:
         # ----------------------------------------------
         # NER tagging
-        entities = get_entities_from_pos_tagged(tagged)
+        entities = get_entities_from_pos_tagged(tagged).keys()
+        logger.debug("NER tagging --- entities : {}".format(entities))
         # ----------------------------------------------
         return entities
 
