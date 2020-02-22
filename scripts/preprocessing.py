@@ -337,11 +337,11 @@ def main(warc_filename):
     """
     warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
-    max_records = 8
+    max_records = 10
     for record in split_records(warcfile):
         if record_no < max_records:
             record_no += 1
-            if record_no < 6:       # TODO: to be removed
+            if record_no < 9:       # TODO: to be removed
                 continue            # TODO: to be removed
             logger.debug("record_no < {}".format(max_records))
 
