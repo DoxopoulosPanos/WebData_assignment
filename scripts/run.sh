@@ -43,10 +43,10 @@ KB_PID=$!
 if [ $# -eq 0 ]
   then
     echo "NO arguments supplied. Using the file /var/scratch/wdps1934/wdps/data/sample.warc.gz as input"
-    prun -t $TIME -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
+    prun -t $TIME -v -np 1 python2 linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
   else
     # argument is given
-    prun -t $TIME -v -np 1 python linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT $1
+    prun -t $TIME -v -np 1 python2 linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT $1
 fi
 
 #prun -v -np 1 python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"

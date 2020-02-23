@@ -8,7 +8,8 @@ The project is on DAS-4 at the folder /var/scratch/wdps1934/WebData_assignment/
 
 inside the folder WebData_assignment there is the README and the folder with the scripts.
 
-In my user environment everything is installed and ready to run. Although, there is a file dependencies.sh inside the folder scripts which include all the necessary libraries.
+In the environment of the user wdps1934 everything is installed and ready to run. For running in a different user please install the dependencies (there is a file dependencies.sh inside the folder scripts which include all the necessary libraries.)
+To execute it please run "bash dependencies.sh"
 
 Executing the following code will reserve 2 nodes for freebase and trident for 1 hour and it will run the python script on a third node.
 The results will be available at the file output.tsv
@@ -25,6 +26,7 @@ For better F1 score please increase the reservation time in the 5th line of the 
 TIME=21600
 ```
 
+The program is written in python 2.
 
 ### 2. Design
 In this section an overview of the algorithm will be given.
