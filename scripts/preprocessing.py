@@ -4,14 +4,18 @@ import gzip
 import re
 from bs4 import BeautifulSoup
 
-#  define logger as global variable
-logger = logging.getLogger(__name__)
+# TWO methods are implemented
+# METHOD == 2 : NER
+METHOD = 1
 
 # define KEYNAME for records
 KEYNAME = "WARC-TREC-ID"
 
 # install nltk prerequisites
 INSTALL_PREREQUISITES = True
+
+#  define logger as global variable
+logger = logging.getLogger(__name__)
 
 
 def prerequisites():
@@ -25,6 +29,7 @@ def prerequisites():
     nltk.download('stopwords')
     nltk.download('wordnet')
     nltk.download('averaged_perceptron_tagger')
+    nltk.download('maxent_ne_chunker')
 
 
 ########################################################
@@ -128,8 +133,10 @@ def split_headers(doc):
     if "Content-Type: text/html; charset=UTF-8" in doc:
         headers, body = doc.split("Content-Type: text/html; charset=UTF-8")
     else:
-        logger.warning("Missed document in split headers")
+        logger.warning("Missed the following document in split headers")
+        logger.warning(doc)
         logger.debug("Document does not have Content-Type value")
+        return None, None
 
     return headers, body
 
@@ -225,6 +232,7 @@ def remove_number_from_string(word_token):
     return ''.join([i for i in word_token if not i.isdigit()])
 
 
+# #########################################################  POS tagging
 def pos_tagging(word_tokens):
     """
     This function uses nltk library in order to perform POS tagging
@@ -258,6 +266,44 @@ def group_consecutive_groups(tagged):
     return names
 
 
+# #########################################################  NER tagging
+def find_NER_type(tokenized_text):
+    """
+    Named Entity Recognition.
+    Finds the NER type of each token
+    :param tokenized_text:
+    :return:
+    """
+    from nltk.tag import StanfordNERTagger
+    st = StanfordNERTagger('../exist-stanford-ner/resources/classifiers/english.all.3class.distsim.crf.ser.gz',
+                           '../exist-stanford-ner/java/lib/stanford-ner-2015-04-20.jar', encoding='utf-8')
+    classified_text = st.tag(tokenized_text)
+
+    return classified_text
+
+
+def get_entities_from_pos_tagged(pos_tagged_text):
+    """
+    NER tagging
+    Using the module ne_chunk of nltk library, this function implements NER tagging and classifies as NE all tokens that
+     have been labelled as PERSON, ORGANIZATION, and GPE
+    :param pos_tagged_text: a list of tokens after as retrieved from pos_tag function of nltk
+    :return: a dictionary of the entities found and the NER type {"word":"type",}
+    """
+    from nltk import ne_chunk
+    from nltk import Tree
+
+    entities = {}
+
+    chunks = ne_chunk(pos_tagged_text)
+    for chunk in chunks:
+        if type(chunk) is Tree:
+            t = ' '.join(c[0] for c in chunk.leaves())
+            entities[t] = chunk.label()
+
+    return entities
+
+
 ########################################################
 ########################################################
 def extract_nouns_from_text(text):
@@ -281,15 +327,27 @@ def extract_nouns_from_text(text):
     # ------------------------------------
     # POS tagging
     tagged = pos_tagging(tokens_without_numbers)
-    groups = group_consecutive_groups(tagged)
-
     # ------------------------------------
+
+    # METHOD 2 uses the ne_chunk NER tagger
+    if METHOD == 2:
+        # ----------------------------------------------
+        # NER tagging
+        entities = get_entities_from_pos_tagged(tagged).keys()
+        logger.debug("NER tagging --- entities : {}".format(entities))
+        # ----------------------------------------------
+        return entities
+
+    # group consecutive_words
+    groups = group_consecutive_groups(tagged)
 
     # stop word removal
     tokens_after_stop_word_removal = []
 
     for tagged_word in remove_stop_words(tagged):  # remove stop words (x[0] = word , x[1]= POS)
-        if len(tagged_word[0]) > 2:  # remove words with length < 3
+        # remove words with length < 3   and they are not capital letters
+        # if word is capital characters it could be an acronym (e.g. DOD)
+        if len(tagged_word[0]) > 2 or tagged_word[0].isupper():
             tokens_after_stop_word_removal.append(tagged_word)
 
     del tokens_without_numbers
@@ -297,11 +355,11 @@ def extract_nouns_from_text(text):
     all_NNP_words = []
     for word in tokens_after_stop_word_removal:
         if word[1] == "NNP":
-            logger.info(word[0])
+            logger.info("tagged_word: ".format(word[0]))
             all_NNP_words.append(word[0])
 
     for tagged_word in groups:
-        logger.info(tagged_word)  # all are NNP
+        logger.info("tagged_word (consecutive): ".format(tagged_word))  # all are NNP
         all_NNP_words.append(tagged_word)
 
     return all_NNP_words
@@ -315,87 +373,53 @@ def main(warc_filename):
     """
     warcfile = gzip.open(warc_filename, "rt")
     record_no = 0
-    max_records = 4
+    #max_records = 10
     for record in split_records(warcfile):
-        if record_no < max_records:
-            record_no += 1
-            logger.debug("record_no < {}".format(max_records))
+        #if record_no < max_records:
+        record_no += 1
+        #logger.debug("record_no < {}".format(max_records))
 
-            logger.info("----------- Document No {}---------------".format(record_no))
-            if not record:  # if empty
-                logger.debug("EMPTY")
-                continue
-            if record_no == 2 or record_no == 3:
-                continue
-            soup = BeautifulSoup(record, "lxml")
-            #logger.info(soup.text)
-            logger.info("==================================")
-            # split headers from body
-            headers, body = split_headers(soup.text)
-            # # HEADERS preprocessing
-            warc_id = find_id(headers)
-            if not warc_id:  # if empty
-                logger.debug("No ID. This file will be skipped")
-                continue
-            logger.info("ID: {}".format(warc_id))
-            # # BODY preprocessing
-            # remove code blocks
-            lines = remove_code_blocks(body)
-            # join all lines together
-            body = " ".join(lines)
-            # tokenize
-            tokens = tokenizer(body) # TODO: all the following block of code should be replaced
-            tokens = [remove_hex_from_string(x) for x in tokens]
-            logger.info("======================+++++++++++++++++++++++++++++++")
+        logger.info("----------- Document No {}---------------".format(record_no))
+        if not record:  # if empty
+            logger.debug("EMPTY")
+            continue
 
-            tokens_without_numbers = []
-            for token in lemmatization(tokens):          # implement stemming
-                token_without_alpha = remove_alphanumeric(token)  # remove alphanumeric
-                token_without_numbers = remove_number_from_string(token_without_alpha)
-                if token_without_numbers is not "":         # remove empty strings
-                    tokens_without_numbers.append(token_without_numbers)
-            logger.info("--------------------------")
+        soup = BeautifulSoup(record, "lxml")
+        logger.debug(soup.text)
+        logger.info("==================================")
+        # split headers from body
+        headers, body = split_headers(soup.text)
+        # if split could not be achieved go to the nect record
+        if body is None:
+            continue
+        # # HEADERS preprocessing
+        warc_id = find_id(headers)
+        if not warc_id:  # if empty
+            logger.debug("No ID. This file will be skipped")
+            continue
+        logger.info("ID: {}".format(warc_id))
+        # # BODY preprocessing
+        # remove code blocks
+        lines = remove_code_blocks(body)
+        # join all lines together
+        body = " ".join(lines)
 
-            # ------------------------------------
-            # POS tagging
-            tagged = pos_tagging(tokens_without_numbers)
-            groups = group_consecutive_groups(tagged)
+        #preprocess the text
+        all_NNP_words = extract_nouns_from_text(body)
 
-            # ------------------------------------
-
-            # stop word removal
-            tokens_after_stop_word_removal = []
-
-            for tagged_word in remove_stop_words(tagged):         # remove stop words (x[0] = word , x[1]= POS)
-                if len(tagged_word[0]) > 2:               # remove words with length < 3
-                    tokens_after_stop_word_removal.append(tagged_word)
-
-            del token_without_numbers
-
-            all_NNP_words = []
-            for word in tokens_after_stop_word_removal:
-                if word[1] == "NNP":
-                    logger.info(word[0])
-                    all_NNP_words.append(word[0])
-            logger.info('====dddddddddddddddddddddddddddd===================================')
-            for tagged_word in groups:
-                logger.info(tagged_word)            # all are NNP
-                all_NNP_words.append(tagged_word)
-
-            if __name__ == "__main__":
-                print all_NNP_words
-            else:
-                yield warc_id, all_NNP_words
-
-            del tokens_after_stop_word_removal
-            del all_NNP_words
-
-            logger.info("--------------------------")
-            logger.info("--------------------------")
+        if __name__ == "__main__":
+            print all_NNP_words
         else:
-            logger.debug("record_no = {}".format(max_records))
-            logger.debug("Exiting...")
-            exit(0)
+            yield warc_id, all_NNP_words
+
+        del all_NNP_words
+
+        logger.info("--------------------------")
+        logger.info("--------------------------")
+    # else:
+    #     logger.debug("record_no = {}".format(max_records))
+    #     logger.debug("Exiting...")
+    #     break
 
 
 if __name__ == "__main__":

@@ -72,11 +72,12 @@ def find_candidates(ES_DOMAIN, ES_QUERY):
     :return:
     """
     total_entities = []
-    for freebase_id, labels in els.search(ES_DOMAIN, ES_QUERY).items():
+    # 2 options els.get_best_candidates() or els.search()
+    for freebase_id, labels in els.get_best_candidates(ES_DOMAIN, ES_QUERY).items():
         my_entity = entity.Entity(ES_QUERY)
         my_entity.freebase_id = freebase_id
         my_entity.freebase_label = labels
-
+        logger.info(my_entity)
         total_entities.append(my_entity)
     return total_entities
 
@@ -179,13 +180,13 @@ def remove_candidates_without_abstracts(candidates):
     return new_candidates
 
 
-def similarity_measure(list1, list2, threeshold=0.8):
+def similarity_measure(list1, list2, threshold=0.8):
     """
     This function calculates a score based on the hamming distance between the words in the two lists.
     If the similarity between two words is above the threeshold then it is calculated as similar
     :param list1: list of stings
     :param list2: list of strings
-    :param threeshold:
+    :param threshold:
     :return: a score (float)
     """
     import textdistance
@@ -194,7 +195,7 @@ def similarity_measure(list1, list2, threeshold=0.8):
 
     for word1 in list1:
         for word2 in list2:
-            if textdistance.hamming.normalized_similarity(word1, word2) > threeshold:
+            if textdistance.hamming.normalized_similarity(word1, word2) > threshold:
                 # word is similar (above the threeshold)
                 score += 1
     # calculate the normalized score
@@ -210,7 +211,7 @@ def main():
     """
     # set loggers
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
-    preprocessing.set_logger(stream_level="error", file_level="error", log_filename="file2.log")
+    preprocessing.set_logger(stream_level="error", file_level="info", log_filename="file2.log")
 
     try:
         _, ELS_DOMAIN, SQL_DOMAIN, WARC_FILE = sys.argv
@@ -268,7 +269,12 @@ def main():
                 candidate_with_best_score.kb_nouns,
                 candidate_with_best_score.similarity_score))
 
-            print "{}    {}    {}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
+            # if the candidate has similarity score less than 0.02 then it is considered as Unlinkable Mention Entity
+            # after many experiments we conclude that the results with such a low are false positives
+            if candidate_with_best_score.similarity_score < 0.2:
+                continue
+
+            print "{}\t{}\t{}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
 
 
 if __name__ == '__main__':

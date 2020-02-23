@@ -4,5 +4,5 @@
 # remove .idea folder
 .idea/*
 
-# remove stanford-ner library
-/exist-stanford-ner/
+# remove pyc files
+*.pyc
