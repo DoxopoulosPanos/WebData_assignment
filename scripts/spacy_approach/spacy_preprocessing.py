@@ -1,12 +1,10 @@
 import sys
 import logging
 import gzip
-import re
 from bs4 import BeautifulSoup
 from bs4 import Comment
 
 #  define logger as global variable
-import linker
 import spacy_entity
 
 logger = logging.getLogger(__name__)

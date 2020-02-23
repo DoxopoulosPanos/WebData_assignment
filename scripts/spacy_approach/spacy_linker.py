@@ -2,8 +2,8 @@ import sys
 import logging
 
 from spacy_preprocessing import preprocess
-import linker
-import preprocessing
+import scripts.linker
+import scripts.preprocessing
 
 
 #  define logger as global variable
@@ -80,18 +80,18 @@ def main():
         doc_entity = document_entity[0]
         logger.debug("===============  Elastic search ==================")
         logger.debug("Candidates for [{}]".format(doc_entity))
-        candidates = linker.find_candidates(ELS_DOMAIN, doc_entity)
-        linker.log_candidates(candidates, "debug")
+        candidates = scripts.linker.find_candidates(ELS_DOMAIN, doc_entity)
+        scripts.linker.log_candidates(candidates, "debug")
         logger.debug("================End of ES -- Start of Trident=================")
         for candidate in candidates:
             logger.debug("QUERY Trident for candidate: {} with id: {}".format(candidate.name, candidate.freebase_id))
-            trident_response = linker.get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
+            trident_response = scripts.linker.get_kb_info_by_candidate(SQL_DOMAIN, candidate.freebase_id)
             #logger.info(json.dumps(trident_response, indent=2))
             # extract only English abstract
-            candidate.kb_abstract = linker.get_only_english_abstract_from_json(trident_response)
+            candidate.kb_abstract = scripts.linker.get_only_english_abstract_from_json(trident_response)
             logger.debug("Abstract from trident: {}\n".format(candidate.kb_abstract))
         logger.debug("===============  END of Trident ==================")
-        candidates = linker.remove_candidates_without_abstracts(candidates)
+        candidates = scripts.linker.remove_candidates_without_abstracts(candidates)
         # if candidates not found (or removed) move to the next word
         if not candidates:
             continue
@@ -102,8 +102,8 @@ def main():
             # concatenate the english abstract of one candidate
             abstract = " ".join(candidate.kb_abstract)
             # extract the nouns from the abstract
-            candidate.kb_nouns = preprocessing.extract_nouns_from_text(abstract)
-            candidate.similarity_score = preprocessing.similarity_measure(document_results, candidate.kb_nouns)
+            candidate.kb_nouns = scripts.preprocessing.extract_nouns_from_text(abstract)
+            candidate.similarity_score = scripts.preprocessing.similarity_measure(document_results, candidate.kb_nouns)
             logger.info("Candidate_id: {},   label: {},   Abstract:  \n{}\n\n Nouns: {}\n\n Score: {}\n\n\n".format(
                 candidate.freebase_id,
                 candidate.freebase_label,
