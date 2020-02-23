@@ -2,7 +2,7 @@
 module load prun
 
 # Time to reserve the node
-TIME=7200
+TIME=21600
 
 # Elastic search
 ES_PORT=9200

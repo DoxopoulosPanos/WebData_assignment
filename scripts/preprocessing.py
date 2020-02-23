@@ -5,7 +5,8 @@ import re
 from bs4 import BeautifulSoup
 
 # TWO methods are implemented
-METHOD = 2
+# METHOD == 2 : NER
+METHOD = 1
 
 # define KEYNAME for records
 KEYNAME = "WARC-TREC-ID"
@@ -354,11 +355,11 @@ def extract_nouns_from_text(text):
     all_NNP_words = []
     for word in tokens_after_stop_word_removal:
         if word[1] == "NNP":
-            logger.info(word[0])
+            logger.info("tagged_word: ".format(word[0]))
             all_NNP_words.append(word[0])
 
     for tagged_word in groups:
-        logger.info(tagged_word)  # all are NNP
+        logger.info("tagged_word (consecutive): ".format(tagged_word))  # all are NNP
         all_NNP_words.append(tagged_word)
 
     return all_NNP_words
@@ -384,7 +385,7 @@ def main(warc_filename):
             continue
 
         soup = BeautifulSoup(record, "lxml")
-        logger.info(soup.text)
+        logger.debug(soup.text)
         logger.info("==================================")
         # split headers from body
         headers, body = split_headers(soup.text)
