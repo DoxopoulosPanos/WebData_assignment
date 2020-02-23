@@ -1,3 +1,4 @@
+import time
 import requests
 
 
@@ -23,8 +24,19 @@ def get_best_candidates(domain, query, results_No=10):
     :return:
     """
     url = 'http://%s/freebase/label/_search' % domain
-    # fetch 100 results from freebase
-    response = requests.get(url, params={'q': query, 'size': 100})
+
+    retries = 3
+
+    while retries > 0:
+        retries = retries - 1
+        try:
+            # fetch 100 results from freebase
+            response = requests.get(url, params={'q': query, 'size': 100})
+            break
+        except:
+            # in case of connection error wait 2 second and retry
+            time.sleep(2)
+
     best_id_labels = {}
     id_labels = []
     if response:

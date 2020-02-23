@@ -11,6 +11,7 @@ class Entity(object):
     def __init__(self, name):
         self.name = name
         self.ner_label = None
+        self.pos_label = None
 
 
 class Mention(Entity):

@@ -4,6 +4,7 @@ This module is used in order to query the knowledge base
 
 import requests
 import json
+import time
 
 
 def sparql(domain, query):
@@ -16,12 +17,23 @@ def sparql(domain, query):
     url = 'http://%s/sparql' % domain
     response = requests.post(url, data={'print': True, 'query': query})
     if response:
-        try:
-            response = response.json()
-            #print(json.dumps(response, indent=2))
-        except Exception as e:
-            print(response)
-            raise e
+        retries = 3
+
+        while retries > 0:
+            retries = retries - 1
+            try:
+                response = response.json()
+                # print(json.dumps(response, indent=2))
+                break
+            except Exception as exception:
+                if retries > 0:
+                    # in case of connection error wait 2 second and retry
+                    time.sleep(2)
+                    continue
+                else:
+                    # if last retry fails then print the Error
+                    print(response)
+                    raise exception
 
     return response
 
