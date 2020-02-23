@@ -4,6 +4,27 @@ Assignment for the course Web Data and Processing Systems (Vrije University of A
 
 ### 1. How to execute
 
+The project is on DAS-4 at the folder /var/scratch/wdps1934/WebData_assignment/
+
+inside the folder WebData_assignment there is the README and the folder with the scripts.
+
+In my user environment everything is installed and ready to run. Although, there is a file dependencies.sh inside the folder scripts which include all the necessary libraries.
+
+Executing the following code will reserve 2 nodes for freebase and trident for 1 hour and it will run the python script on a third node.
+The results will be available at the file output.tsv
+
+```
+cd /var/scratch/wdps1934/WebData_assignment/scripts
+bash run.sh ../../wdps/data/sample.warc.gz > output.tsv
+```
+Instead of the sample input "../../wdps/data/sample.warc.gz" you can use another file
+
+For better F1 score please increase the reservation time in the 5th line of the run.sh
+```
+# Time to reserve the node
+TIME=21600
+```
+
 
 ### 2. Design
 In this section an overview of the algorithm will be given.
@@ -18,7 +39,7 @@ The purpose of preprocessing is to clear the information of the records and then
 5. NLP pipeline. Tokenization, lemmatization, stopword removal and pos tagging are taking place in this step. After tokenization we also remove all the alphanumerics, hex etc. POS tagging is achieved with the use of the module pos_tag of the nltk library. Additionally, after POS tagging we group the consecutive words classified with the same POS label.
 Find Entity Mentions in each record. We consider as entities all the tokens than were classified as NNP by the nltk POS tagger. The reason of this selection is that the mentions are names of persons, companies etc which are defined as NNP in Penn treebank set.
 
-Another step of the NLP preprocessing is the NER tagging. The main algorithm does not include this step. A second algorithm (METHOD=2) uses the module ne_chunk from nltk library and finds and classifies all tokens according to their NER type. If the NER label of a word is PERSON, ORGANIZATION, or GPE then they are considered as mentions. This algorithm also groups consecutive words with the same NER label.  
+Another step of the NLP preprocessing is the NER tagging. The main algorithm does not include this step. A second algorithm (METHOD=2) uses the module ne_chunk from nltk library and finds and classifies all tokens according to their NER type. If the NER label of a word is PERSON, ORGANIZATION, or GPE then they are considered as mentions. This algorithm also groups consecutive words with the same NER label.
 
 The results of the second method are disappointing mainly because we use the same algorithm to define entities in the sparql abstract (see Entity Linking). The entities are just a few and the similarity measurement between the mention and the candidate is not accurate. The purpose of this algorithm was to implement matching between the NER type of the mention and the NER type of the candidate.
 
