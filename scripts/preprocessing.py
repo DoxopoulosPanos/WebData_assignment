@@ -29,6 +29,7 @@ def prerequisites():
     nltk.download('stopwords')
     nltk.download('wordnet')
     nltk.download('averaged_perceptron_tagger')
+    nltk.download('punkt')
     nltk.download('maxent_ne_chunker')
 
 

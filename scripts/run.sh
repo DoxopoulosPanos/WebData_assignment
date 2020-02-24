@@ -37,9 +37,6 @@ KB_PID=$!
 #echo "Trident should be running now on node $KB_NODE:$KB_PORT (connected to process $KB_PID)"
 #####################################
 
-#python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
-
-#prun -v -np 1 python preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
 if [ $# -eq 0 ]
   then
     echo "NO arguments supplied. Using the file /var/scratch/wdps1934/wdps/data/sample.warc.gz as input"
@@ -48,9 +45,6 @@ if [ $# -eq 0 ]
     # argument is given
     prun -t $TIME -v -np 1 python2 linker.py $ES_NODE:$ES_PORT $KB_NODE:$KB_PORT $1
 fi
-
-#prun -v -np 1 python elasticsearch.py $ES_NODE:$ES_PORT "Vrije Universiteit Amsterdam"
-
 
 # kill elastic search server
 kill $ES_PID
