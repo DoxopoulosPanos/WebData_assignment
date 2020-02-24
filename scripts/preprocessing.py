@@ -32,6 +32,10 @@ def prerequisites():
     nltk.download('maxent_ne_chunker')
 
 
+if INSTALL_PREREQUISITES:
+    prerequisites()
+
+
 ########################################################
 #                      logger functions                #
 ########################################################
@@ -427,12 +431,6 @@ if __name__ == "__main__":
     # set logger
     set_logger(stream_level="error", file_level="info", log_filename="file1.log")
 
-    #   nltk prerequisites
-    if INSTALL_PREREQUISITES:
-        logger.debug("Install prerequisites for nltk...")
-        prerequisites()
-        logger.debug("Installation of nltk prerequisites completed")
-
     # read input (filename)
     logger.debug("Read input (filename)")
     if len(sys.argv) > 1:
@@ -442,13 +440,4 @@ if __name__ == "__main__":
         raise IOError
 
     main(sys.argv[1])
-
-
-    # experiments
-    # from nltk.tag import StanfordNERTagger
-    # st = StanfordNERTagger('exist-stanford-ner/resources/classifiers/english.all.3class.distsim.crf.ser.gz',
-    #                        'exist-stanford-ner/java/lib/stanford-ner-2015-04-20.jar', encoding='utf-8')
-    # classified_text = st.tag(tokenized_text)
-#               python3 preprocessing.py "../../../sample.warc.gz"
-#               python3 preprocessing.py "/var/scratch/wdps1934/wdps/data/sample.warc.gz"
 

@@ -7,6 +7,11 @@ import sparql
 import preprocessing
 import entity
 
+# threshold. the similarity matching returns a score defining the similarity between the mention and the candidate.
+# If the score of the best candidate is less than the threshold then we define it as Unlinkable Mention Entity.
+# increasing this will improve the correct mappings but there is a risk of not taking into account an Entity Mention
+THRESHOLD_FOR_UNLINKABLE_MENTION = 0.2
+
 #  define logger as global variable
 logger = logging.getLogger(__name__)
 
@@ -269,9 +274,9 @@ def main():
                 candidate_with_best_score.kb_nouns,
                 candidate_with_best_score.similarity_score))
 
-            # if the candidate has similarity score less than 0.02 then it is considered as Unlinkable Mention Entity
+            # if the candidate has similarity score less than 0.2 then it is considered as Unlinkable Mention Entity
             # after many experiments we conclude that the results with such a low are false positives
-            if candidate_with_best_score.similarity_score < 0.2:
+            if candidate_with_best_score.similarity_score < THRESHOLD_FOR_UNLINKABLE_MENTION:
                 continue
 
             print "{}\t{}\t{}".format(warc_id, doc_entity, candidate_with_best_score.freebase_id)
