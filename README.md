@@ -58,7 +58,11 @@ Find Entity Mentions in each record. We consider as entities all the tokens than
 
 Another step of the NLP preprocessing is the NER tagging. The main algorithm does not include this step. A second algorithm (METHOD=2, this can be defined in the beginning of the file preprocessing.py) uses the module ne_chunk from nltk library and finds and classifies all tokens according to their NER type. If the NER label of a word is PERSON, ORGANIZATION, or GPE then they are considered as mentions. This algorithm also groups consecutive words with the same NER label.
 
-The results of the second method are disappointing mainly because we use the same algorithm to define entities in the sparql abstract (see next section). The entities returned are just a few and the similarity measurement between the mention and the candidate is not accurate. The purpose of this algorithm was to implement matching between the NER type of the mention and the NER type of the candidate.
+The results of the second method are disappointing mainly because we use the same algorithm to define entities in the sparql abstract (see next section). The entities returned are just a few and the similarity measurement between the mention and the candidate is not accurate. In order for this method to return a few results, it is needed to decrease the similarity score threshold for defining a mention as unlinkable (e.g. 0.05 or 0.1). This can be defined in the linker.py in the 13th line:
+```
+THRESHOLD_FOR_UNLINKABLE_MENTION = 0.2
+```
+The initial purpose of this algorithm was to implement matching between the NER type of the mention and the NER type of the candidate.
 
 
 #### 3.2 Entity Linking
@@ -73,11 +77,11 @@ For each mention query the Freebase (Elastic Search) to retrieve 100 results mat
 
 Query Trident using SPARQL and get the abstract for each result. Keep only the English abstracts.
 Find and classify the mentions of each abstract. (We consider as entities all the tokens than were classified as NNP by the nltk POS tagger)
-Find the BEST matching (Word Sense Disambiguation). We look for similarities between mentions in each record and mentions in SPARQL abstract. This step implements a context-independent feature called Bag Of Words. As we use the words of the whole document trying to figure out if the candidate is an appropriate solution for the mention. In more detail, we detect entities in the trident’s abstract. For each entity in the abstract we use Hamming distance to find the distance with each mention of the document. If the distance is above the threshold (after a few experiments, 0.8 seems a good threshold) we increase a counter. We normalize the counter by dividing it with the number of entities found in the abstract. Then we keep the best candidate according to the aforementioned score. In order to increase the precision, if the best candidate has score less than 0.02 then we consider this mention as false positive and we do not print it.
+Find the BEST matching (Word Sense Disambiguation). We look for similarities between mentions in each record and mentions in SPARQL abstract. This step implements a context-independent feature called Bag Of Words. As we use the words of the whole document trying to figure out if the candidate is an appropriate solution for the mention. In more detail, we detect entities in the trident’s abstract. For each entity in the abstract we use Hamming distance to find the distance with each mention of the document. If the distance is above the threshold (after a few experiments, 0.8 seems a good threshold) we increase a counter. We normalize the counter by dividing it with the number of entities found in the abstract. Then we keep the best candidate according to the aforementioned score. In order to increase the precision, if the best candidate has score less than 0.02 then we consider this mention as false positive and we do not print it. In other words we define it as Unlinkable Mention Entity.
 
 <b>Unlinkable Mention Prediction</b>
 
-The entity mentions that couldn’t be linked they are not taken into consideration.
+The entity mentions that couldn’t be linked are not taken into consideration. Moreover, in case the best candidate has similarity score below the threshold 0.2 it is considered as inaccurate linking and therefore defined as unlinkable.
 
 
 ### 4. Results
@@ -100,7 +104,7 @@ Precision: 0.07100591715976332
 Recall: 0.02142857142857143
 F1: 0.03292181069958847
 ```
-We observe that the recall has improved since we found more correct mappings, but the precision got worse as there are many linked entities that are not included in the golden entities. Overall, the F1 score has improved. Possibly, an execution bigger in duration could have an even better result.
+We observe that the recall has improved since we found more correct mappings, but the precision got worse as there are many linked entities that are not included in the golden entities. Overall, the F1 score has improved. Possibly, a bigger execution in duration could have an even better result.
 
 ### 5. Future work
 The program is not focusing on scalability issues. In order to improve scalability, spark can be used, as it is the most common framework for linking. Moreover, identifying relations in the text could improve the precision of the linking. Last but not least, another metric that could be improved is the Bag Of Words (BOW). The algorithm keeps only the mentions found in the record as the BOW of each mention. One idea that could potentially improve the results is to add the most frequent Nouns (NN, NNS) found in each document during the POS tagging.
