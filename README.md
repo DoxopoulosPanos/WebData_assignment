@@ -1,6 +1,6 @@
 # Assignment: Web Data and Processing Systems
 ## Entity Linking
-Assignment for the course Web Data and Processing Systems (Vrije University of Amsterdam) - NLP
+Assignment for the course Web Data and Processing Systems (Vrije University of Amsterdam) - NLP pipeline and Entity Linking
 
 ### 1. How to execute
 
